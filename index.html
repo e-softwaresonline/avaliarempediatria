@@ -181,11 +181,96 @@ button { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* Cartões que viram */
+.flip { perspective: 1200px; min-height: 236px; }
+.flip.bonus { grid-column: 1 / -1; }
+.flip-inner { position: relative; width: 100%; height: 100%; min-height: 236px; transition: transform .6s cubic-bezier(.2,.7,.2,1); transform-style: preserve-3d; }
+.flip.flipped .flip-inner { transform: rotateY(180deg); }
+.face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 14px; border: 1px solid var(--grid); background: var(--surface); padding: 18px 20px; }
+.face.front { all: unset; box-sizing: border-box; position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; cursor: pointer; border-radius: 14px; border: 1px solid var(--grid);
+  background: linear-gradient(160deg, var(--surface) 55%, var(--sel)); display: flex; flex-direction: column; justify-content: space-between; padding: 22px; }
+.face.front h3 { font-size: 24px; }
+.face.front:hover { border-color: var(--accent); }
+.face.front:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.flip.bonus .face.front { border: 2px solid var(--accent); }
+.front-meta { color: var(--muted); font-size: 14px; }
+.face.back { transform: rotateY(180deg); display: grid; gap: 12px; align-content: start; border-color: var(--accent); }
+.face.back h3 { font-size: 18px; }
+.flip.bonus .face.back .games { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.corner { position: fixed; right: 16px; bottom: 16px; z-index: 20; border: 0; border-radius: 999px; padding: 12px 18px; font-weight: 700;
+  background: var(--ink); color: var(--paper); box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+.corner:hover { background: var(--accent); color: var(--accent-ink); }
+.corner-msg { position: fixed; right: 16px; bottom: 66px; z-index: 20; max-width: 300px; font-size: 14px; background: var(--surface); border-radius: 10px; padding: 0 12px; }
+.corner-msg:not(:empty) { padding: 8px 12px; border: 1px solid var(--grid); }
+.wrap { padding-bottom: 90px; }
+@media (prefers-reduced-motion: reduce) { .flip-inner { transition: none; } }
+
+/* ---- Acabamento moderno ---- */
+:root { --radius: 18px; --shadow: 0 1px 2px rgba(18,48,46,.06), 0 8px 24px rgba(18,48,46,.07); --shadow-lift: 0 2px 4px rgba(18,48,46,.08), 0 16px 36px rgba(18,48,46,.12); --tint: color-mix(in srgb, var(--accent) 12%, var(--surface)); }
+body { background-size: 32px 32px; }
+.panel { border-radius: var(--radius); box-shadow: var(--shadow); border-color: color-mix(in srgb, var(--grid) 70%, transparent); }
+.btn { border-radius: 999px; padding: 12px 22px; transition: transform .15s, box-shadow .15s, background .15s; }
+.btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 16px color-mix(in srgb, var(--accent) 30%, transparent); }
+.btn.ghost:hover:not(:disabled) { box-shadow: none; border-color: var(--accent); }
+.score-chip { box-shadow: var(--shadow); border-color: transparent; padding: 8px 16px; }
+.topbar { background: color-mix(in srgb, var(--surface) 82%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: var(--radius); padding: 16px 20px; box-shadow: var(--shadow); }
+.topics { gap: 18px; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); }
+.toolbar { border-radius: var(--radius); box-shadow: var(--shadow); border-color: transparent; background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.tool { border-radius: 999px; }
+.opt, .tile { border-radius: 14px; transition: border-color .15s, background .15s, transform .15s; }
+.opt:hover:not(:disabled), .tile:hover:not(:disabled) { transform: translateY(-1px); }
+.feedback { border-radius: 14px; }
+.progress { height: 6px; }
+
+/* Cartões: as duas faces ocupam a mesma célula, então a altura segue o conteúdo */
+.flip { perspective: 1400px; min-height: 0; }
+.flip-inner { display: grid; min-height: 0; height: auto; }
+.flip .face, .flip .face.front { position: relative; inset: auto; grid-area: 1 / 1; border-radius: var(--radius); box-shadow: var(--shadow); min-height: 200px; }
+.flip .face.front { padding: 20px 22px; gap: 14px; justify-content: space-between; border: 1px solid color-mix(in srgb, var(--grid) 70%, transparent);
+  background: radial-gradient(120% 90% at 100% 0%, var(--tint), var(--surface) 60%); transition: transform .2s, box-shadow .2s; }
+.flip:not(.flipped) .face.front:hover { box-shadow: var(--shadow-lift); }
+.flip .face.front h3 { font-size: 22px; line-height: 1.15; }
+.dots { display: flex; gap: 5px; }
+.dots i { width: 22px; height: 5px; border-radius: 999px; background: var(--grid); }
+.dots i.on { background: var(--good); }
+.front-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.front-icons { display: flex; gap: 6px; }
+.front-icons span { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--paper); color: var(--muted); }
+.front-icons svg { width: 16px; height: 16px; }
+.front-meta { font-size: 14px; font-weight: 700; color: var(--accent); }
+.front-meta b { display: inline-block; transition: transform .2s; }
+.face.front:hover .front-meta b { transform: translateX(3px); }
+
+.flip .face.back { padding: 14px; gap: 10px; align-content: start; border: 1.5px solid var(--accent); background: var(--surface); }
+.back-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 2px 4px 0 6px; }
+.back-title { font-family: var(--font-display); font-weight: 700; font-size: 16px; line-height: 1.2; }
+.iconbtn { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border-radius: 50%; border: 0; background: var(--paper); color: var(--ink); }
+.iconbtn:hover { background: var(--tint); color: var(--accent); }
+.iconbtn svg { width: 18px; height: 18px; }
+.flip .face.back .games { display: grid; gap: 6px; padding: 0; }
+.flip.bonus .face.back .games { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+.flip .gamebtn { display: flex; align-items: center; gap: 12px; padding: 9px 10px; border-radius: 12px; border: 1px solid transparent; background: var(--paper); min-height: 0; transition: background .15s, border-color .15s, transform .15s; }
+.flip .gamebtn:hover { background: var(--tint); border-color: color-mix(in srgb, var(--accent) 40%, transparent); transform: translateX(2px); }
+.flip .gamebtn .gicon { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border-radius: 10px; background: var(--surface); color: var(--accent); box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+.flip .gamebtn .gicon svg { width: 18px; height: 18px; }
+.gtext { display: grid; gap: 1px; flex: 1; min-width: 0; text-align: left; }
+.gname { font-weight: 700; font-size: 15px; line-height: 1.2; }
+.gsub { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.gsub.done { color: var(--good); font-weight: 700; }
+.garrow { font-size: 22px; line-height: 1; color: var(--muted); }
+.flip .gamebtn:hover .garrow { color: var(--accent); }
+.flip.flipped .face.back { box-shadow: var(--shadow-lift); }
+.corner { padding: 12px 20px; box-shadow: var(--shadow-lift); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25); --shadow-lift: 0 2px 4px rgba(0,0,0,.35), 0 16px 36px rgba(0,0,0,.35); } }
+:root[data-theme="dark"] { --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25); --shadow-lift: 0 2px 4px rgba(0,0,0,.35), 0 16px 36px rgba(0,0,0,.35); }
+@media (prefers-reduced-motion: reduce) { .btn, .opt, .tile, .flip .gamebtn, .front-meta b { transition: none; } }
 </style>
 </head>
 <body>
 <main class="wrap" id="app" aria-live="polite"></main>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 // ---------- Conteúdo ----------
 const TOPICS = [
@@ -508,33 +593,7 @@ TOPICS.forEach(t => { if (KEEP[t.id]) t.caso = KEEP[t.id].map(i => t.caso[i]); }
 
 const GAME_LABELS ={ assoc: "Associação", mv: "Mito ou verdade", caso: "Raciocínio clínico" };
 
-// ---------- Avaliação (20 questões, gabarito equilibrado: 5 de cada letra) ----------
-const EVAL = [
-  ["Para avaliar excesso de peso em uma criança de 7 anos, o índice recomendado é:", ["Peso/idade", "IMC/idade", "Peso/estatura", "Estatura/idade"], 1],
-  ["Uma criança de 30 meses foi medida deitada: 92,0 cm. Qual valor registrar como altura?", ["92,7 cm", "92,0 cm", "91,0 cm", "91,3 cm"], 3],
-  ["Qual é o principal hormônio do crescimento fetal?", ["Insulina", "Hormônio do crescimento (GH)", "Testosterona", "Cortisol"], 0],
-  ["Qual é a meia-vida aproximada da pré-albumina?", ["18 a 20 dias", "8 a 9 dias", "2 a 3 dias", "12 horas"], 2],
-  ["Criança de 3 anos com edema bilateral, dermatose descamativa e hepatomegalia por esteatose. A hipótese principal é:", ["Kwashiorkor", "Marasmo", "Raquitismo", "Hipotireoidismo"], 0],
-  ["Menino de 9 anos com IMC/idade em +2,5 escore-z. A classificação é:", ["Sobrepeso", "Eutrofia", "Obesidade", "Obesidade grave"], 2],
-  ["Qual é o ponto de corte da razão cintura/estatura para obesidade abdominal?", ["0,4", "0,5", "0,6", "0,8"], 1],
-  ["Qual inquérito alimentar reflete um único dia e depende da memória do entrevistado?", ["Registro alimentar", "Questionário de frequência alimentar", "Pesagem direta dos alimentos", "Recordatório de 24 horas"], 3],
-  ["Segundo a SBP (2021), qual é o intervalo mínimo entre duas medidas para calcular a velocidade de crescimento?", ["1 mês", "3 meses", "6 meses", "2 anos"], 2],
-  ["Qual é o primeiro sinal de puberdade no menino?", ["Volume testicular de 4 mL ou mais", "Pelos pubianos", "Mudança da voz", "Estirão de crescimento"], 0],
-  ["Qual destes é critério da OMS/UNICEF para desnutrição aguda grave entre 6 e 60 meses?", ["Peso/idade abaixo de −2 escore-z", "Estatura/idade abaixo de −3 escore-z", "IMC/idade abaixo de −2 escore-z", "Circunferência do braço abaixo de 115 mm"], 3],
-  ["Lactente de 18 meses com hemoglobina de 11,5 g/dL e ferritina de 10 ng/mL. A situação é:", ["Anemia ferropriva", "Deficiência de ferro sem anemia", "Estado normal do ferro", "Anemia megaloblástica"], 1],
-  ["A mancha de Bitot indica deficiência de:", ["Ferro", "Vitamina C", "Zinco", "Vitamina A"], 3],
-  ["Menino cujo pai mede 178 cm e a mãe 162 cm. Qual é a estatura-alvo?", ["170 cm", "176,5 cm", "163,5 cm", "183,5 cm"], 1],
-  ["Nas equações de Slaughter, um adolescente no estágio 3 de Tanner é classificado como:", ["Pré-púbere", "Pós-púbere", "Púbere", "Não se aplica a equação"], 2],
-  ["No prematuro, até que idade se usa a idade corrigida para peso, estatura e perímetro cefálico?", ["24 meses", "12 meses", "6 meses", "5 anos"], 0],
-  ["Criança de 3 anos com estatura/idade em −3,4 escore-z. A classificação é:", ["Baixa estatura para a idade", "Muito baixa estatura para a idade", "Estatura adequada", "Magreza acentuada"], 1],
-  ["Na fase aguda de uma inflamação, o esperado é:", ["Albumina cai e PCR sobe", "Albumina sobe e PCR cai", "Albumina e PCR sobem", "Albumina e PCR caem"], 0],
-  ["Na criança internada com menos de 2 anos, a SBP recomenda monitorar:", ["Peso semanal e estatura mensal", "Peso apenas na admissão", "Peso mensal", "Peso diário; estatura e perímetro cefálico semanais"], 3],
-  ["A pressão arterial deve ser aferida na criança:", ["Desde o nascimento, em toda consulta", "A partir de 1 ano, uma vez por ano", "A partir de 3 anos, a cada 6 meses", "Somente a partir dos 10 anos"], 2]
-];
 const LETTERS = ["a", "b", "c", "d"];
-
-// URL do aplicativo da Web do Google Apps Script (veja o README). Deixe vazio para não enviar.
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzKRyvBg03E6koHO0m9JlOgwGV6-DsdMeeeggWvCnU8QCrM5oEE5JWc7YAFMQwaCPtE/exec";
 
 // ---------- Ícones ----------
 const ICONS = {
@@ -546,7 +605,7 @@ const ICONS = {
 
 // ---------- Estado ----------
 const app = document.getElementById("app");
-const state = { name: "", results: {}, open: null };
+const state = { name: "", results: {}, flipped: null, hist: null, loginAt: 0, gameStart: 0 };
 function storeGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 function storeSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 function loadResults() {
@@ -591,7 +650,7 @@ function renderStart() {
       <circle cx="300" cy="50" r="6" fill="var(--accent)"/>
     </svg>
     <h1>Avaliação nutricional da criança e do adolescente</h1>
-    <p class="muted">Jogos por tema (associação, mito ou verdade e raciocínio clínico) e uma avaliação final. Conteúdo atualizado pelo Manual da SBP (2021), SISVAN e OMS.</p>
+    <p class="muted">Jogos por tema: associação, mito ou verdade e raciocínio clínico. Conteúdo atualizado pelo Manual da SBP (2021), SISVAN e OMS. O tempo de participação é contado a partir da entrada.</p>
     <form id="nameForm" class="field" novalidate>
       <label for="studentName">Seu nome</label>
       <input id="studentName" name="studentName" autocomplete="name" maxlength="60" placeholder="Digite seu nome" value="${esc(saved)}">
@@ -606,63 +665,196 @@ function renderStart() {
     e.preventDefault();
     const v = inp.value.trim();
     if (v.length < 2) { document.getElementById("nameErr").textContent = "Digite seu nome para começar (pelo menos 2 letras)."; inp.focus(); return; }
-    state.name = v; storeSet("anp-name", v); loadResults(); renderHub();
+    state.name = v; storeSet("anp-name", v); loadResults(); startSession(); renderHub();
   });
+}
+
+// ---------- Tempo e participação ----------
+function histKey() { return "anp-hist-" + state.name.toLowerCase(); }
+function loadHist() {
+  try { state.hist = JSON.parse(storeGet(histKey()) || "null") || { sessoes: [], jogos: [] }; }
+  catch (e) { state.hist = { sessoes: [], jogos: [] }; }
+}
+function saveHist() { storeSet(histKey(), JSON.stringify(state.hist)); }
+function startSession() {
+  loadHist();
+  state.loginAt = Date.now();
+  state.hist.sessoes.push({ inicio: state.loginAt, ultimo: state.loginAt });
+  saveHist();
+  clearInterval(state.tick);
+  state.tick = setInterval(() => { touch(); const el = document.getElementById("clock"); if (el) el.textContent = fmtDur(Date.now() - state.loginAt); }, 1000);
+}
+function touch() {
+  const s = state.hist && state.hist.sessoes[state.hist.sessoes.length - 1];
+  if (!s) return;
+  s.ultimo = Date.now();
+  if (!state.lastSave || Date.now() - state.lastSave > 15000) { saveHist(); state.lastSave = Date.now(); }
+}
+function fmtDur(ms) {
+  const t = Math.max(0, Math.round(ms / 1000));
+  const h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), sec = t % 60;
+  return (h ? h + " h " : "") + String(m).padStart(h ? 2 : 1, "0") + " min " + String(sec).padStart(2, "0") + " s";
+}
+function fmtData(ts) {
+  const d = new Date(ts);
+  return d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 }
 
 // ---------- Painel principal ----------
 function renderHub() {
+  touch();
   const t = totals();
   const nGames = TOPICS.length * 3;
   app.innerHTML = `
   <header class="topbar">
     <div style="display:grid;gap:4px">
       <h2>Olá, ${esc(state.name)}</h2>
-      <p class="muted">Treine nos jogos de cada tema e depois faça a avaliação.</p>
+      <p class="muted">Toque em um tema para virar o cartão e escolher o jogo.</p>
     </div>
     <div class="row">
+      <span class="score-chip" title="Tempo desde a entrada">⏱ <span id="clock">${fmtDur(Date.now() - state.loginAt)}</span></span>
       <span class="score-chip" title="Soma dos melhores resultados">${t.s} / ${t.t || 0} pontos · ${t.n} de ${nGames} jogos</span>
       <button class="btn ghost" id="changeName" type="button">Trocar nome</button>
     </div>
   </header>
-  <section class="panel evalcard">
-    <div style="display:grid;gap:6px">
-      <span class="eyebrow">Avaliação</span>
-      <h2>Avaliação final</h2>
-      <p class="muted">${EVAL.length} questões de múltipla escolha (a a d), misturando todos os temas. Será pedido seu nome e sua matrícula.</p>
-    </div>
-    <button class="btn" type="button" id="goEval">Fazer avaliação</button>
-  </section>
   <section class="topics">
     ${TOPICS.map(tp => {
-      const isOpen = state.open === tp.id;
+      const f = state.flipped === tp.id;
+      const done = ["assoc", "mv", "caso"].filter(g => state.results[tp.id + ":" + g]).length;
       return `
-      <article class="panel topic${tp.bonus ? " bonus" : ""}${isOpen ? " open" : ""}">
-        <button class="topic-toggle" type="button" data-topic="${tp.id}" aria-expanded="${isOpen}" aria-controls="g-${tp.id}">
-          <h3>${tp.bonus ? "★ " : ""}${tp.title}</h3>
-          <span class="chev" aria-hidden="true">${isOpen ? "−" : "+"}</span>
-        </button>
-        <div class="games" id="g-${tp.id}" ${isOpen ? "" : "hidden"}>
-          ${["assoc", "mv", "caso"].map(g => {
-            const r = state.results[tp.id + ":" + g];
-            const n = tp[g].length;
-            return `<button class="gamebtn" type="button" data-topic="${tp.id}" data-game="${g}">
-              <span class="kind"><span class="gicon">${ICONS[g]}</span>${GAME_LABELS[g]}</span>
-              <span class="best ${r ? "done" : ""}">${r ? "Melhor: " + r.score + "/" + r.total : n + " rodadas"}</span>
-            </button>`;
-          }).join("")}
+      <article class="flip${tp.bonus ? " bonus" : ""}${f ? " flipped" : ""}">
+        <div class="flip-inner">
+          <button class="face front" type="button" data-flip="${tp.id}" aria-label="${tp.title}: ver jogos" ${f ? "inert" : ""}>
+            <span class="dots" aria-hidden="true">${[0, 1, 2].map(k => `<i class="${k < done ? "on" : ""}"></i>`).join("")}</span>
+            <h3>${tp.bonus ? "★ " : ""}${tp.title}</h3>
+            <span class="front-foot">
+              <span class="front-icons" aria-hidden="true">${["assoc", "mv", "caso"].map(g => `<span>${ICONS[g]}</span>`).join("")}</span>
+              <span class="front-meta">${done ? done + "/3 feitos" : "Ver jogos"} <b aria-hidden="true">→</b></span>
+            </span>
+          </button>
+          <div class="face back" ${f ? "" : "inert"}>
+            <div class="back-head">
+              <span class="back-title">${tp.title}</span>
+              <button class="iconbtn" type="button" data-unflip="${tp.id}" aria-label="Virar o cartão de volta" title="Voltar">${ICONS.back}</button>
+            </div>
+            <div class="games">
+              ${["assoc", "mv", "caso"].map(g => {
+                const r = state.results[tp.id + ":" + g];
+                return `<button class="gamebtn" type="button" data-topic="${tp.id}" data-game="${g}">
+                  <span class="gicon">${ICONS[g]}</span>
+                  <span class="gtext"><span class="gname">${GAME_LABELS[g]}</span><span class="gsub ${r ? "done" : ""}">${r ? "Melhor: " + r.score + "/" + r.total : tp[g].length + " rodadas"}</span></span>
+                  <span class="garrow" aria-hidden="true">›</span>
+                </button>`;
+              }).join("")}
+            </div>
+          </div>
         </div>
       </article>`;
     }).join("")}
-  </section>`;
-  document.getElementById("changeName").onclick = renderStart;
-  document.getElementById("goEval").onclick = renderEvalLogin;
-  app.querySelectorAll(".topic-toggle").forEach(b => b.onclick = () => {
-    state.open = state.open === b.dataset.topic ? null : b.dataset.topic;
-    renderHub();
-    const el = app.querySelector(`[data-topic="${b.dataset.topic}"].topic-toggle`); if (el) el.focus();
+  </section>
+  <button class="corner" type="button" id="report">Gerar resumo de participação</button>
+  <div id="reportMsg" class="corner-msg" role="status"></div>`;
+  document.getElementById("changeName").onclick = () => { clearInterval(state.tick); touch(); saveHist(); renderStart(); };
+  document.getElementById("report").onclick = gerarResumo;
+  app.querySelectorAll("[data-flip]").forEach(b => b.onclick = () => {
+    state.flipped = b.dataset.flip; renderHub();
+    const back = app.querySelector(".flip.flipped .gamebtn"); if (back) back.focus();
+  });
+  app.querySelectorAll("[data-unflip]").forEach(b => b.onclick = () => {
+    const id = b.dataset.unflip; state.flipped = null; renderHub();
+    const fr = app.querySelector(`[data-flip="${id}"]`); if (fr) fr.focus();
   });
   app.querySelectorAll(".gamebtn").forEach(b => b.onclick = () => startGame(b.dataset.topic, b.dataset.game));
+}
+
+// ---------- Resumo de participação (PDF) ----------
+function pdfTxt(s) { return String(s).replace(/[–—−]/g, "-").replace(/[“”]/g, '"').replace(/★/g, "").replace(/[^\x20-\xFF]/g, ""); }
+function resumoDados() {
+  touch(); saveHist();
+  const h = state.hist;
+  const totalMs = h.sessoes.reduce((a, s) => a + (s.ultimo - s.inicio), 0);
+  const linhas = [];
+  TOPICS.forEach(tp => ["assoc", "mv", "caso"].forEach(g => {
+    const js = h.jogos.filter(j => j.topic === tp.id && j.game === g);
+    if (!js.length) { linhas.push({ tema: tp.title, jogo: GAME_LABELS[g], vezes: 0 }); return; }
+    const melhor = js.reduce((a, j) => j.score / j.total > a.score / a.total ? j : a, js[0]);
+    const ult = js[js.length - 1];
+    linhas.push({ tema: tp.title, jogo: GAME_LABELS[g], vezes: js.length, melhor: melhor.score + "/" + melhor.total,
+      ultimo: ult.score + "/" + ult.total, erros: g === "assoc" ? js.reduce((a, j) => a + (j.errors || 0), 0) : null,
+      tempo: js.reduce((a, j) => a + j.dur, 0) });
+  }));
+  return { h, totalMs, linhas, jogados: linhas.filter(l => l.vezes).length };
+}
+function gerarResumo() {
+  const msg = document.getElementById("reportMsg");
+  const lib = window.jspdf && window.jspdf.jsPDF;
+  if (!lib) { msg.textContent = "Não foi possível carregar o gerador de PDF. Verifique a internet e tente de novo."; return; }
+  const { h, totalMs, linhas, jogados } = resumoDados();
+  const doc = new lib({ unit: "mm", format: "a4" });
+  const W = 210, M = 16;
+  let y = 20;
+  const ink = [18, 48, 46], accent = [224, 82, 58], muted = [85, 115, 112];
+  doc.setFillColor(...ink); doc.rect(0, 0, W, 6, "F");
+  doc.setFont("helvetica", "bold"); doc.setFontSize(18); doc.setTextColor(...ink);
+  doc.text(pdfTxt("Resumo de participação"), M, y); y += 7;
+  doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(...muted);
+  doc.text(pdfTxt("Jogos de avaliação nutricional da criança e do adolescente"), M, y); y += 10;
+
+  const campo = (rot, val) => { doc.setFont("helvetica", "bold"); doc.setTextColor(...ink); doc.text(pdfTxt(rot), M, y); doc.setFont("helvetica", "normal"); doc.text(pdfTxt(val), M + 52, y); y += 6; };
+  doc.setFontSize(11);
+  campo("Aluno(a):", state.name);
+  campo("Gerado em:", fmtData(Date.now()));
+  campo("Entrada desta sessão:", fmtData(state.loginAt));
+  campo("Tempo nesta sessão:", fmtDur(Date.now() - state.loginAt));
+  campo("Tempo total registrado:", fmtDur(totalMs) + " em " + h.sessoes.length + (h.sessoes.length === 1 ? " sessão" : " sessões"));
+  campo("Jogos concluídos:", jogados + " de " + linhas.length + " (" + h.jogos.length + (h.jogos.length === 1 ? " partida" : " partidas") + " no total)");
+  const t = totals();
+  campo("Pontuação (melhores):", t.s + " de " + (t.t || 0) + " pontos");
+  y += 4;
+
+  const cols = [{ k: "tema", t: "Tema", w: 40 }, { k: "jogo", t: "Jogo", w: 36 }, { k: "vezes", t: "Vezes", w: 14 }, { k: "melhor", t: "Melhor", w: 18 }, { k: "ultimo", t: "Último", w: 18 }, { k: "erros", t: "Erros assoc.", w: 22 }, { k: "tempo", t: "Tempo", w: 30 }];
+  const header = () => {
+    doc.setFillColor(...ink); doc.rect(M, y - 4.5, W - 2 * M, 7, "F");
+    doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(255, 255, 255);
+    let x = M + 2; cols.forEach(c => { doc.text(pdfTxt(c.t), x, y); x += c.w; }); y += 6;
+  };
+  header();
+  doc.setFont("helvetica", "normal"); doc.setFontSize(9);
+  let lastTema = "";
+  linhas.forEach((l, i) => {
+    if (y > 280) { doc.addPage(); y = 20; header(); doc.setFont("helvetica", "normal"); doc.setFontSize(9); }
+    if (i % 2 === 0) { doc.setFillColor(243, 247, 246); doc.rect(M, y - 4.2, W - 2 * M, 6, "F"); }
+    doc.setTextColor(...(l.vezes ? ink : muted));
+    const vals = { tema: l.tema === lastTema ? "" : l.tema, jogo: l.jogo, vezes: String(l.vezes), melhor: l.melhor || "-", ultimo: l.ultimo || "-",
+      erros: l.erros === null || l.erros === undefined ? "-" : String(l.erros), tempo: l.vezes ? fmtDur(l.tempo) : "-" };
+    lastTema = l.tema;
+    let x = M + 2; cols.forEach(c => { doc.text(pdfTxt(vals[c.k]), x, y, { maxWidth: c.w - 2 }); x += c.w; }); y += 6;
+  });
+
+  y += 6;
+  if (y > 260) { doc.addPage(); y = 20; }
+  doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(...ink);
+  doc.text(pdfTxt("Histórico de partidas"), M, y); y += 7;
+  doc.setFont("helvetica", "normal"); doc.setFontSize(9);
+  if (!h.jogos.length) { doc.setTextColor(...muted); doc.text(pdfTxt("Nenhuma partida concluída ainda."), M, y); y += 6; }
+  h.jogos.slice().reverse().forEach(j => {
+    if (y > 285) { doc.addPage(); y = 20; }
+    const tp = TOPICS.find(x => x.id === j.topic);
+    doc.setTextColor(...ink);
+    const linha = fmtData(j.fim) + "  |  " + (tp ? tp.title : j.topic) + " - " + GAME_LABELS[j.game] + "  |  " + j.score + "/" + j.total +
+      (j.game === "assoc" ? "  |  " + (j.errors || 0) + " tentativas erradas" : "") + "  |  " + fmtDur(j.dur);
+    doc.text(pdfTxt(linha), M, y); y += 5;
+  });
+
+  const pages = doc.getNumberOfPages();
+  for (let p = 1; p <= pages; p++) {
+    doc.setPage(p); doc.setFontSize(8); doc.setTextColor(...muted);
+    doc.text(pdfTxt(state.name + " - página " + p + " de " + pages), M, 292);
+    doc.setDrawColor(...accent); doc.setLineWidth(0.6); doc.line(M, 287, W - M, 287);
+  }
+  const arquivo = "resumo-participacao-" + state.name.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase() + ".pdf";
+  try { doc.save(arquivo); msg.textContent = "PDF gerado: " + arquivo; }
+  catch (e) { msg.textContent = "O navegador bloqueou o download. Abra a página fora desta janela e tente de novo."; }
 }
 
 // ---------- Barra superior dos jogos ----------
@@ -678,7 +870,7 @@ function toolbar(tp, game) {
 function bindToolbar(tp) {
   app.querySelectorAll(".toolbar .tool").forEach(b => b.onclick = () => {
     const n = b.dataset.nav;
-    if (n === "back") { state.open = tp.id; renderHub(); window.scrollTo(0, 0); }
+    if (n === "back") { state.flipped = tp.id; renderHub(); window.scrollTo(0, 0); }
     else startGame(tp.id, n);
   });
 }
@@ -691,6 +883,7 @@ function statline(idx, total, score, extra) {
 
 function startGame(topicId, game) {
   const tp = TOPICS.find(t => t.id === topicId);
+  state.gameStart = Date.now(); touch();
   window.scrollTo(0, 0);
   if (game === "assoc") return playAssoc(tp);
   if (game === "mv") return playMV(tp);
@@ -815,6 +1008,9 @@ function playAssoc(tp) {
 
 function finish(tp, game, score, total, errors) {
   saveResult(tp.id, game, score, total);
+  const fim = Date.now();
+  state.hist.jogos.push({ topic: tp.id, game, score, total, errors: errors || 0, inicio: state.gameStart, fim, dur: fim - state.gameStart });
+  touch(); saveHist();
   const pct = score / total;
   const msg = pct === 1 ? "Gabaritou! Domínio completo do tema."
     : pct >= 0.7 ? "Muito bom. Revise só os itens que errou."
@@ -827,7 +1023,7 @@ function finish(tp, game, score, total, errors) {
     <div class="big">${score}<small> / ${total}</small></div>
     <p>${msg}</p>
     ${game === "assoc" ? `<p>Tentativas erradas: <strong>${errors}</strong></p>` : ""}
-    <p class="muted">Melhor resultado neste jogo: ${best.score}/${best.total}</p>
+    <p class="muted">Melhor resultado neste jogo: ${best.score}/${best.total} · Tempo nesta partida: ${fmtDur(Date.now() - state.gameStart)}</p>
     <div class="row">
       <button class="btn" type="button" id="again">Jogar de novo</button>
     </div>
@@ -835,118 +1031,6 @@ function finish(tp, game, score, total, errors) {
   bindToolbar(tp);
   document.getElementById("again").onclick = () => startGame(tp.id, game);
   document.getElementById("again").focus();
-}
-
-// ---------- Avaliação ----------
-function renderEvalLogin() {
-  window.scrollTo(0, 0);
-  app.innerHTML = `
-  <nav class="toolbar"><button class="tool back" type="button" id="evBack">${ICONS.back}<span>Voltar</span></button><span class="tool-title">Avaliação</span></nav>
-  <section class="panel login">
-    <h2>Identificação</h2>
-    <p class="muted">Preencha seu nome completo e sua matrícula. Cada envio fica registrado para o professor.</p>
-    <form id="loginForm" class="field" novalidate>
-      <label for="evName">Nome completo</label>
-      <input id="evName" autocomplete="name" maxlength="80" placeholder="Nome e sobrenome">
-      <label for="evMat">Matrícula</label>
-      <input id="evMat" inputmode="numeric" maxlength="20" placeholder="Número de matrícula">
-      <div class="err" id="evErr" role="alert"></div>
-      <div class="row"><button class="btn" type="submit">Iniciar avaliação</button></div>
-    </form>
-  </section>`;
-  document.getElementById("evBack").onclick = renderHub;
-  document.getElementById("evName").focus();
-  document.getElementById("loginForm").addEventListener("submit", e => {
-    e.preventDefault();
-    const nome = document.getElementById("evName").value.trim();
-    const mat = document.getElementById("evMat").value.trim();
-    const err = document.getElementById("evErr");
-    if (nome.length < 3) { err.textContent = "Digite seu nome completo."; return; }
-    if (mat.length < 3) { err.textContent = "Digite sua matrícula."; return; }
-    runEval(nome, mat);
-  });
-}
-
-function runEval(nome, mat) {
-  const answers = new Array(EVAL.length).fill(null);
-  const started = Date.now();
-  let i = 0;
-  const draw = () => {
-    const [q, opts] = EVAL[i];
-    const done = answers.filter(a => a !== null).length;
-    app.innerHTML = `
-    <nav class="toolbar"><span class="tool-title">Avaliação · ${esc(nome)} · ${esc(mat)}</span></nav>
-    <section class="panel" style="display:grid;gap:18px">
-      <div class="gamehead">
-        <div class="progress" aria-hidden="true"><span style="width:${Math.round(done / EVAL.length * 100)}%"></span></div>
-        <div class="statline"><span>Questão ${i + 1} de ${EVAL.length}</span><span>Respondidas: ${done}</span></div>
-      </div>
-      <p class="question">${i + 1}. ${esc(q)}</p>
-      <div class="options" role="radiogroup" aria-label="Alternativas">
-        ${opts.map((o, k) => `<button class="opt evopt${answers[i] === k ? " chosen" : ""}" type="button" role="radio" aria-checked="${answers[i] === k}" data-k="${k}"><span class="letter">${LETTERS[k]})</span> ${esc(o)}</button>`).join("")}
-      </div>
-      <div class="row between">
-        <button class="btn ghost" type="button" id="prev" ${i === 0 ? "disabled" : ""}>Anterior</button>
-        <button class="btn" type="button" id="next" ${answers[i] === null ? "disabled" : ""}>${i === EVAL.length - 1 ? "Revisar e enviar" : "Próxima"}</button>
-      </div>
-    </section>`;
-    app.querySelectorAll(".evopt").forEach(b => b.onclick = () => { answers[i] = Number(b.dataset.k); draw(); });
-    document.getElementById("prev").onclick = () => { i--; draw(); };
-    document.getElementById("next").onclick = () => { if (i < EVAL.length - 1) { i++; draw(); } else review(); };
-  };
-  const review = () => {
-    const blank = answers.map((a, k) => a === null ? k + 1 : null).filter(Boolean);
-    app.innerHTML = `
-    <nav class="toolbar"><span class="tool-title">Avaliação · ${esc(nome)} · ${esc(mat)}</span></nav>
-    <section class="panel result">
-      <h2>Revise antes de enviar</h2>
-      <div class="answers">${answers.map((a, k) => `<button class="ans" type="button" data-k="${k}"><b>${k + 1}</b> ${a === null ? "–" : LETTERS[a]}</button>`).join("")}</div>
-      <p class="muted">${blank.length ? "Sem resposta: " + blank.join(", ") + ". " : ""}Toque em um número para voltar à questão. Depois de enviar não é possível alterar.</p>
-      <div class="err" id="sendErr" role="alert"></div>
-      <div class="row"><button class="btn" type="button" id="send" ${blank.length ? "disabled" : ""}>Enviar avaliação</button></div>
-    </section>`;
-    app.querySelectorAll(".ans").forEach(b => b.onclick = () => { i = Number(b.dataset.k); draw(); });
-    document.getElementById("send").onclick = () => submit();
-  };
-  const submit = async () => {
-    const correct = answers.filter((a, k) => a === EVAL[k][2]).length;
-    const payload = {
-      nome, matricula: mat,
-      respostas: answers.map(a => LETTERS[a]).join(""),
-      acertos: correct, total: EVAL.length,
-      duracaoSeg: Math.round((Date.now() - started) / 1000),
-      inicio: new Date(started).toISOString(),
-      navegador: navigator.userAgent.slice(0, 120)
-    };
-    const btn = document.getElementById("send");
-    btn.disabled = true; btn.textContent = "Enviando…";
-    let sent = false, msg = "";
-    if (!APPS_SCRIPT_URL) {
-      msg = "O envio para a planilha ainda não foi configurado nesta página. Mostre este resultado ao professor.";
-    } else {
-      try {
-        await fetch(APPS_SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
-        sent = true;
-      } catch (e) {
-        document.getElementById("sendErr").textContent = "Não foi possível enviar. Verifique sua conexão e toque em Enviar avaliação de novo.";
-        btn.disabled = false; btn.textContent = "Enviar avaliação";
-        return;
-      }
-    }
-    const n = Number(storeGet("anp-eval-count-" + mat) || 0) + 1;
-    storeSet("anp-eval-count-" + mat, String(n));
-    app.innerHTML = `
-    <nav class="toolbar"><button class="tool back" type="button" id="evHome">${ICONS.back}<span>Voltar aos temas</span></button><span class="tool-title">Avaliação</span></nav>
-    <section class="panel result">
-      <span class="crumb">${esc(nome)} · matrícula ${esc(mat)}</span>
-      <h2>Avaliação ${sent ? "enviada" : "concluída"}</h2>
-      <div class="big">${correct}<small> / ${EVAL.length}</small></div>
-      <p>Nota: <strong>${(correct / EVAL.length * 10).toFixed(1).replace(".", ",")}</strong> · Tempo: ${Math.round(payload.duracaoSeg / 60)} min</p>
-      <p class="muted">${sent ? "Suas respostas foram registradas na planilha do professor." : msg}</p>
-    </section>`;
-    document.getElementById("evHome").onclick = renderHub;
-  };
-  draw();
 }
 
 renderStart();
