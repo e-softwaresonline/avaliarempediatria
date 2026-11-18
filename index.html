@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jogos de Avaliação Nutricional Pediátrica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Plano: papel de curva de crescimento (grade fina), tinta verde-petróleo, acento coral para ação; uma coluna central, cartões de tema em grade */
+  --paper: #f3f7f6;
+  --surface: #ffffff;
+  --ink: #12302e;
+  --muted: #557370;
+  --grid: #dce7e4;
+  --accent: #e0523a;
+  --accent-ink: #ffffff;
+  --good: #1f8a5b;
+  --good-bg: #e2f4ea;
+  --bad: #b8382f;
+  --bad-bg: #fbe7e4;
+  --sel: #fff1d6;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0f1c1b; --surface: #172826; --ink: #e4efec; --muted: #9db6b1; --grid: #1f3431;
+    --accent: #f06a50; --accent-ink: #1a0d0a; --good: #4cc48c; --good-bg: #173a2b;
+    --bad: #f07a6f; --bad-bg: #3d1f1c; --sel: #3b3220; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0f1c1b; --surface: #172826; --ink: #e4efec; --muted: #9db6b1; --grid: #1f3431;
+  --accent: #f06a50; --accent-ink: #1a0d0a; --good: #4cc48c; --good-bg: #173a2b;
+  --bad: #f07a6f; --bad-bg: #3d1f1c; --sel: #3b3220; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.5;
+}
+.wrap { max-width: 980px; margin: 0 auto; padding: 28px 18px 60px; display: grid; gap: 22px; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.12; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 46px); font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: clamp(22px, 3.4vw, 30px); font-weight: 700; }
+h3 { font-size: 20px; font-weight: 700; }
+p { margin: 0; max-width: 65ch; }
+.muted { color: var(--muted); }
+.panel { background: var(--surface); border: 1px solid var(--grid); border-radius: 14px; padding: 22px; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.btn {
+  border: 0; border-radius: 10px; padding: 12px 18px; font-weight: 700;
+  background: var(--accent); color: var(--accent-ink);
+}
+.btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--grid); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.between { justify-content: space-between; }
+
+/* Início */
+.start { display: grid; gap: 18px; padding: 34px 26px; }
+.start .curve { width: 100%; max-width: 460px; height: auto; }
+.field { display: grid; gap: 6px; max-width: 420px; }
+.field label { font-weight: 700; }
+.field input {
+  padding: 13px 14px; border-radius: 10px; border: 1.5px solid var(--grid);
+  background: var(--paper); font-size: 18px;
+}
+.err { color: var(--bad); font-size: 15px; min-height: 1.2em; }
+
+/* Hub */
+.topbar { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; }
+.score-chip { font-family: var(--font-display); font-weight: 700; background: var(--surface); border: 1px solid var(--grid); border-radius: 999px; padding: 6px 14px; font-variant-numeric: tabular-nums; }
+.topics { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.topic { display: grid; gap: 12px; align-content: start; }
+.topic .num { font-family: var(--font-display); font-weight: 800; color: var(--accent); font-size: 15px; letter-spacing: .06em; }
+.games { display: grid; gap: 8px; }
+.gamebtn {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  text-align: left; padding: 11px 13px; border-radius: 10px;
+  border: 1.5px solid var(--grid); background: var(--paper);
+}
+.gamebtn:hover { border-color: var(--accent); }
+.gamebtn .kind { font-weight: 700; }
+.gamebtn .best { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.gamebtn .best.done { color: var(--good); font-weight: 700; }
+
+.topic.bonus { grid-column: 1 / -1; border: 2px solid var(--accent); background: linear-gradient(135deg, var(--sel), var(--surface) 60%); }
+.topic.bonus .games:not([hidden]) { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.topic { padding: 0; overflow: hidden; }
+.topic-toggle { all: unset; box-sizing: border-box; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; padding: 18px 20px; }
+.topic-toggle:hover h3 { color: var(--accent); }
+.topic-toggle:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+.chev { font-family: var(--font-display); font-weight: 800; font-size: 24px; color: var(--accent); line-height: 1; width: 28px; text-align: center; }
+.topic .games { padding: 0 20px 18px; }
+.games[hidden] { display: none; }
+.topic.open { border-color: var(--accent); }
+.gicon svg, .tool svg { width: 20px; height: 20px; flex: none; }
+.gamebtn .kind { display: flex; align-items: center; gap: 8px; }
+.evalcard { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; border: 2px solid var(--ink); }
+.eyebrow { font-family: var(--font-display); font-weight: 800; color: var(--accent); font-size: 14px; letter-spacing: .08em; text-transform: uppercase; }
+.toolbar { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 12px; background: var(--surface); border: 1px solid var(--grid); border-radius: 14px; }
+.tool-title { font-family: var(--font-display); font-weight: 700; flex: 1; min-width: 120px; }
+.tool-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.tool { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 10px; border: 1.5px solid var(--grid); background: var(--paper); font-weight: 700; font-size: 15px; }
+.tool:hover { border-color: var(--accent); }
+.tool.active { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.tool.back { background: transparent; }
+.letter { font-family: var(--font-display); font-weight: 800; color: var(--accent); margin-right: 4px; }
+.opt.chosen { background: var(--sel); border-color: var(--accent); }
+.answers { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 8px; width: 100%; }
+.ans { padding: 8px; border-radius: 8px; border: 1.5px solid var(--grid); background: var(--paper); font-variant-numeric: tabular-nums; }
+.ans b { color: var(--muted); margin-right: 4px; }
+.login .field { gap: 8px; }
+.errcount { color: var(--bad); font-weight: 700; }
+@media (max-width: 560px) { .tool span { display: none; } .tool { padding: 8px 10px; } }
+
+/* Jogo */
+.gamehead { display: grid; gap: 10px; }
+.crumb { font-size: 14px; color: var(--muted); }
+.progress { height: 8px; background: var(--grid); border-radius: 999px; overflow: hidden; }
+.progress > span { display: block; height: 100%; background: var(--accent); transition: width .3s; }
+.statline { display: flex; justify-content: space-between; font-size: 15px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.question { font-size: 19px; font-weight: 700; max-width: 70ch; }
+.case { background: var(--paper); border-left: 4px solid var(--accent); padding: 14px 16px; border-radius: 8px; max-width: 75ch; }
+.options { display: grid; gap: 10px; }
+.opt {
+  text-align: left; padding: 13px 15px; border-radius: 10px;
+  border: 1.5px solid var(--grid); background: var(--surface);
+}
+.opt:hover:not(:disabled) { border-color: var(--accent); }
+.opt.right { background: var(--good-bg); border-color: var(--good); }
+.opt.wrong { background: var(--bad-bg); border-color: var(--bad); }
+.opt:disabled { cursor: default; }
+.mv { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 520px; }
+.mv .opt { text-align: center; font-family: var(--font-display); font-weight: 800; font-size: 22px; padding: 18px; }
+.feedback { border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; max-width: 75ch; }
+.feedback.ok { background: var(--good-bg); }
+.feedback.no { background: var(--bad-bg); }
+.feedback strong { font-family: var(--font-display); font-size: 18px; }
+
+/* Associação */
+.match { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.col { display: grid; gap: 8px; align-content: start; }
+.col h3 { font-size: 15px; color: var(--muted); font-family: var(--font-body); text-transform: uppercase; letter-spacing: .05em; }
+.tile {
+  text-align: left; padding: 11px 12px; border-radius: 10px; font-size: 15.5px;
+  border: 1.5px solid var(--grid); background: var(--surface); min-height: 48px;
+}
+.tile:hover:not(:disabled) { border-color: var(--accent); }
+.tile.selected { background: var(--sel); border-color: var(--accent); }
+.tile.matched { background: var(--good-bg); border-color: var(--good); cursor: default; }
+.tile.shake { animation: shake .35s; border-color: var(--bad); background: var(--bad-bg); }
+.tile .tag { font-family: var(--font-display); font-weight: 800; color: var(--good); margin-right: 6px; }
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+/* Resultado */
+.result { display: grid; gap: 16px; justify-items: start; }
+.big { font-family: var(--font-display); font-weight: 800; font-size: clamp(44px, 9vw, 72px); line-height: 1; font-variant-numeric: tabular-nums; }
+.big small { font-size: .4em; color: var(--muted); font-weight: 700; }
+
+@media (max-width: 560px) {
+  .match { gap: 8px; }
+  .tile { font-size: 14px; padding: 9px; }
+  .panel { padding: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<main class="wrap" id="app" aria-live="polite"></main>
+
+<script>
+// ---------- Conteúdo ----------
+const TOPICS = [
+  {
+    id: "conceitos", title: "Conceitos e fisiologia",
+    desc: "Fases do crescimento, hormônios, puberdade e variantes da normalidade.",
+    assoc: [
+      ["Fase do lactente", "Fatores nutricionais e ambientais predominam sobre os genéticos"],
+      ["Fase pré-púbere", "Crescimento estável de 5 a 7 cm/ano"],
+      ["Fase puberal final", "1 a 1,5 cm/ano, sobretudo no tronco, por cerca de 3 anos"],
+      ["Insulina", "Principal hormônio do crescimento fetal"],
+      ["Hormônios tireoidianos", "Os mais importantes no lactente; maturação óssea e cerebral"],
+      ["Eixo GH–IGF-1", "Proliferação dos condrócitos da placa de crescimento"],
+      ["Estrogênio", "Fechamento das epífises em ambos os sexos"],
+      ["Rebote de adiposidade", "Nova subida da gordura corporal entre 5 e 7 anos"]
+    ],
+    mv: [
+      ["O padrão familiar de estatura é o principal determinante do crescimento nos dois primeiros anos de vida.", false, "Nessa fase predominam os fatores nutricionais e ambientais; genética e GH têm menor atuação."],
+      ["No primeiro ano de vida, a criança cresce cerca de 25 cm.", true, "Aproximadamente 15 cm no 1º semestre e 10 cm no 2º, aumentando 50% do comprimento ao nascer."],
+      ["Na desnutrição, o IGF-1 cai e surge resistência periférica ao GH.", true, "Por isso o crescimento linear desacelera mesmo com GH presente."],
+      ["O primeiro sinal de puberdade no menino é o aparecimento de pelos pubianos.", false, "O primeiro sinal é o aumento do volume testicular para 4 mL ou mais (G2)."],
+      ["Nas meninas, o pico de velocidade de crescimento acontece antes da menarca.", true, "O pico ocorre por volta de M2–M3; depois da menarca a velocidade cai rapidamente."],
+      ["A massa livre de gordura da criança é menos hidratada que a do adulto.", false, "É mais hidratada e menos densa. Por isso equações de adulto não servem para crianças."],
+      ["Rebote de adiposidade antes dos 5 anos associa-se a maior risco de obesidade.", true, "O rebote precoce é um sinal de alerta que reforça o acompanhamento do IMC/idade."],
+      ["Na baixa estatura familiar, a idade óssea está atrasada em relação à cronológica.", false, "Na baixa estatura familiar a idade óssea é compatível com a cronológica. Atrasada é no retardo constitucional."]
+    ],
+    caso: [
+      ["Uma menina de 9 anos tem estatura no escore-z −0,5, mas a velocidade de crescimento do último ano ficou abaixo do percentil 25 de VC. Qual é a melhor conduta?",
+        ["Investigar precocemente, mesmo com a estatura ainda normal", "Tranquilizar a família, pois a estatura é normal", "Reavaliar só quando a estatura ficar abaixo de −2", "Iniciar suplementação calórica sem investigar"], 0,
+        "VC abaixo do P25 caracteriza crescimento lento. A SBP orienta investigar antes que a estatura fique comprometida."],
+      ["Menino de 13 anos, baixa estatura, VC no limite inferior, idade óssea atrasada e sem sinais puberais. O pai teve puberdade tardia. Hipótese mais provável?",
+        ["Retardo constitucional do crescimento e da puberdade", "Baixa estatura familiar", "Deficiência de GH confirmada", "Síndrome de Turner"], 0,
+        "Atraso de idade óssea e puberal, sem doença associada e com história familiar, define o retardo constitucional."],
+      ["Menina de 7 anos chega com broto mamário (M2). Como interpretar?",
+        ["Sinal de puberdade precoce, que deve ser investigado", "Variação normal da telarca", "Atraso puberal", "Achado esperado para a idade"], 0,
+        "Caracteres sexuais antes dos 8 anos nas meninas sugerem puberdade precoce."],
+      ["Menino de 14 anos sem aumento testicular. Qual é a classificação?",
+        ["Atraso puberal", "Puberdade normal", "Puberdade precoce", "Pós-púbere"], 0,
+        "A ausência de aumento testicular aos 14 anos define atraso puberal."],
+      ["Um lactente nasceu com 50 cm. Qual comprimento aproximado se espera aos 12 meses?",
+        ["75 cm", "60 cm", "85 cm", "100 cm"], 0,
+        "Ao fim do 1º ano a criança aumenta cerca de 50% do comprimento ao nascer (cerca de 25 cm)."],
+      ["Criança de 6 anos em uso prolongado de corticoide oral passou a crescer menos. Qual é o mecanismo mais provável?",
+        ["Glicocorticoides em excesso inibem o crescimento", "Excesso de estrogênio fechando as epífises", "Aumento de IGF-1", "Efeito do hormônio tireoidiano"], 0,
+        "Glicocorticoides em excesso inibem o crescimento, por isso o uso de corticoide deve ser investigado na anamnese."]
+    ]
+  },
+  {
+    id: "tecnica", title: "Técnica de medida",
+    desc: "Equipamentos, posicionamento, correções e estimativas de estatura.",
+    assoc: [
+      ["Pesa-bebê", "Até 23 meses, capacidade de 16 kg, divisões de 10 g"],
+      ["Balança plataforma", "A partir de 24 meses, divisões de no mínimo 100 g"],
+      ["Comprimento", "Deitado, com dois examinadores, até 23 meses"],
+      ["Plano de Frankfurt", "Cabeça erguida, olhando um ponto fixo na altura dos olhos"],
+      ["Perímetro cefálico", "Fita sobre a glabela e o occipício"],
+      ["Circunferência do braço", "Ponto médio entre acrômio e olécrano, braço direito"],
+      ["Circunferência abdominal", "Ponto médio entre a última costela fixa e a crista ilíaca"],
+      ["Dobra subescapular", "1 cm abaixo do ângulo inferior da escápula, a 45°"]
+    ],
+    mv: [
+      ["Criança de 3 anos medida deitada: soma-se 0,7 cm ao valor obtido.", false, "Maior de 2 anos medida deitada: subtrai-se 0,7 cm. Soma-se quando o menor de 2 anos é medido em pé."],
+      ["A altura deve ser arredondada para o meio centímetro mais próximo.", true, "Exemplo da SBP: 110,2 cm vira 110 cm e 131,8 cm vira 132 cm."],
+      ["As dobras cutâneas são medidas no hemicorpo esquerdo.", false, "A padronização de Lohman usa sempre o hemicorpo direito."],
+      ["Das três medidas de cada dobra, adota-se a média.", false, "Adota-se a mediana, para eliminar valores extremos."],
+      ["Se a diferença entre a maior e a menor medida da dobra passar de 5%, a série é refeita.", true, "Essa regra reduz o erro intra e interavaliador."],
+      ["A velocidade de crescimento pode ser calculada com medidas feitas a cada 3 meses.", false, "A SBP recomenda intervalo mínimo de 6 meses entre as medidas para evitar erro de cálculo."],
+      ["No prematuro, usa-se idade corrigida até 24 meses para peso, estatura e perímetro cefálico.", true, "O ajuste também vale para circunferência braquial e dobra tricipital."],
+      ["A aferição periódica das balanças deve ser feita por assistência credenciada pelo INMETRO.", true, "É condição para a confiabilidade dos dados coletados."]
+    ],
+    caso: [
+      ["Uma criança de 18 meses só pôde ser medida em pé: 80,0 cm. Qual valor registrar como comprimento?",
+        ["80,7 cm", "79,3 cm", "80,0 cm", "81,4 cm"], 0,
+        "Menor de 2 anos medido em pé: soma-se 0,7 cm."],
+      ["Menino de 8 anos com paralisia cerebral tem comprimento a partir do joelho (CJ) de 40 cm. Pela equação de Stevenson, a estatura estimada é:",
+        ["131,8 cm", "107,6 cm", "120,4 cm", "140,2 cm"], 0,
+        "E = (2,69 × 40) + 24,2 = 107,6 + 24,2 = 131,8 cm."],
+      ["Lactente de 8 meses nasceu com 32 semanas. Qual idade usar no gráfico?",
+        ["6 meses (idade corrigida)", "8 meses (idade cronológica)", "4 meses", "10 meses"], 0,
+        "Faltaram 8 semanas (2 meses) para 40 semanas: 8 − 2 = 6 meses de idade corrigida."],
+      ["Menina cujo pai mede 180 cm e a mãe 164 cm. Qual é a estatura-alvo e o canal familiar?",
+        ["165,5 cm, de 160,5 a 170,5 cm", "172 cm, de 167 a 177 cm", "165,5 cm, de 156,5 a 174,5 cm", "158,5 cm, de 153,5 a 163,5 cm"], 0,
+        "[(180 − 13) + 164] ÷ 2 = 165,5 cm. A SBP considera normal ± 5 cm."],
+      ["Uma criança media 112 cm em março e 115 cm em setembro do mesmo ano. Qual é a velocidade de crescimento?",
+        ["6 cm/ano", "3 cm/ano", "12 cm/ano", "1,5 cm/ano"], 0,
+        "3 cm em 0,5 ano: 3 ÷ 0,5 = 6 cm/ano, dentro do esperado na fase pré-púbere."],
+      ["Criança internada com edema generalizado. Qual peso usar na avaliação nutricional?",
+        ["O peso habitual ou o mais recente antes do edema", "O peso atual, sem ajuste", "O peso ideal para a idade", "Não pesar até o edema sumir"], 0,
+        "Com edema, desidratação, tumores ou visceromegalias, o peso atual pode não representar o real."],
+      ["Menino cujo pai mede 175 cm e a mãe 160 cm. Qual é a estatura-alvo?",
+        ["174 cm", "167,5 cm", "161 cm", "181 cm"], 0,
+        "[175 + (160 + 13)] ÷ 2 = 348 ÷ 2 = 174 cm."]
+    ]
+  },
+  {
+    id: "indices", title: "Índices e pontos de corte",
+    desc: "SISVAN, curvas da OMS, escore-z e classificação do estado nutricional.",
+    assoc: [
+      ["Peso/idade", "Baixo peso; não diferencia agudo de crônico"],
+      ["Estatura/idade", "Efeito cumulativo de agravos (stunting)"],
+      ["Peso/estatura", "Disponível só até 5 anos; dispensa a idade"],
+      ["IMC/I > +2 e ≤ +3 (5 a 19 anos)", "Obesidade"],
+      ["IMC/I > +2 e ≤ +3 (0 a 5 anos)", "Sobrepeso"],
+      ["E/I < −3", "Muito baixa estatura para a idade"],
+      ["P/E < −3", "Magreza acentuada"],
+      ["Escore-z +1", "Corresponde ao percentil 85"]
+    ],
+    mv: [
+      ["Peso/idade acima de +2 escore-z diagnostica obesidade.", false, "P/I > +2 é peso elevado para a idade. O excesso de peso é avaliado por P/E ou IMC/I."],
+      ["Em adolescentes, os índices recomendados são IMC/idade e estatura/idade.", true, "P/I e P/E não são usados na adolescência."],
+      ["A referência OMS 2007 traz peso/estatura para escolares.", false, "P/E só existe até 5 anos (OMS 2006). Depois usa-se IMC/idade."],
+      ["Em menores de 5 anos, IMC/idade entre +1 e +2 é risco de sobrepeso.", true, "Acima de +2 é sobrepeso e acima de +3, obesidade nessa faixa."],
+      ["A faixa entre os percentis 3 e 15 exige atenção especial.", true, "É a faixa de vigilância para baixo peso ou baixa estatura, sobretudo com curva descendente."],
+      ["Estatura/idade acima de +3 escore-z sempre indica doença.", false, "Raramente é problema de saúde, mas pode indicar distúrbio endócrino ou tumor se houver suspeita."],
+      ["O escore-z permite calcular médias de grupos, ao contrário do percentil.", true, "Por isso o escore-z é o mais indicado para pesquisa e vigilância."],
+      ["O peso/idade é usado até os 19 anos.", false, "A OMS 2007 traz P/I apenas até 10 anos, pela grande variação do peso na puberdade."]
+    ],
+    caso: [
+      ["Menina de 4 anos com IMC/idade em +2,4 escore-z. Qual é a classificação?",
+        ["Sobrepeso", "Obesidade", "Risco de sobrepeso", "Eutrofia"], 0,
+        "De 0 a 5 anos, IMC/I > +2 e ≤ +3 é sobrepeso."],
+      ["Menino de 8 anos com IMC/idade em +2,4 escore-z. Qual é a classificação?",
+        ["Obesidade", "Sobrepeso", "Obesidade grave", "Risco de sobrepeso"], 0,
+        "De 5 a 19 anos, IMC/I > +2 e ≤ +3 é obesidade."],
+      ["Adolescente de 14 anos com IMC/idade em −2,5 escore-z. Qual é a classificação?",
+        ["Magreza", "Magreza acentuada", "Eutrofia", "Baixo peso para a idade"], 0,
+        "IMC/I ≥ −3 e < −2 é magreza. Abaixo de −3 seria magreza acentuada."],
+      ["Criança de 3 anos: P/I −2,3; E/I −2,5; P/E −0,4. Qual é a melhor interpretação?",
+        ["Baixa estatura, com peso proporcional à estatura", "Magreza acentuada", "Desnutrição aguda grave", "Eutrofia em todos os índices"], 0,
+        "O baixo P/I acompanha a baixa estatura (déficit crônico); o P/E normal mostra que não há emagrecimento atual."],
+      ["Menina de 6 anos com 99 cm. A mediana é 106 cm e o desvio-padrão, 3 cm. Qual é o escore-z e a classificação?",
+        ["−2,33: baixa estatura", "−2,33: muito baixa estatura", "−1,0: estatura adequada", "+2,33: estatura adequada"], 0,
+        "(99 − 106) ÷ 3 = −2,33, que fica entre −3 e −2: baixa estatura para a idade."],
+      ["Criança de 2 anos com suspeita de excesso de peso. Qual índice usar?",
+        ["Peso/estatura ou IMC/idade", "Peso/idade", "Estatura/idade", "Perímetro cefálico/idade"], 0,
+        "P/I não avalia excesso de peso. Abaixo de 5 anos usa-se P/E ou IMC/I."],
+      ["Criança de 18 meses com circunferência do braço de 110 mm, sem edema, P/E −2,5. Qual é o diagnóstico?",
+        ["Desnutrição aguda grave", "Magreza, sem gravidade", "Eutrofia", "Baixa estatura"], 0,
+        "Pela OMS/UNICEF (2009), basta um critério: CB < 115 mm entre 6 e 60 meses."]
+    ]
+  },
+  {
+    id: "composicao", title: "Composição corporal",
+    desc: "Dobras, Slaughter, áreas do braço, cintura e métodos de imagem e bioimpedância.",
+    assoc: [
+      ["Slaughter", "%G pela soma das dobras tricipital e subescapular, com Tanner e etnia"],
+      ["DXA", "Padrão-ouro, com radiação inferior a 10 µSv"],
+      ["Bioimpedância", "O tecido magro, rico em água, conduz melhor a corrente"],
+      ["Deutério", "Água corporal total estimada pela saliva"],
+      ["AMB < P5", "Risco de distúrbios associados à desnutrição"],
+      ["AGB > P95", "Risco associado ao excesso de gordura"],
+      ["Cintura/estatura > 0,5", "Obesidade abdominal"],
+      ["Freedman", "Circunferência abdominal acima do P90"]
+    ],
+    mv: [
+      ["Antes da bioimpedância, recomenda-se jejum de 4 horas.", true, "Também: sem diurético por 7 dias, sem álcool por 48 h, sem exercício extenuante por 24 h e bexiga vazia."],
+      ["Equações de adultos podem ser aplicadas a crianças sem prejuízo.", false, "A massa livre de gordura da criança é mais hidratada; usam-se equações pediátricas."],
+      ["A DXA diferencia gordura subcutânea de gordura visceral.", false, "É uma das limitações da DXA."],
+      ["A razão cintura/estatura precisa de tabela por idade e sexo.", false, "O ponto de corte de 0,5 dispensa ajuste por idade, sexo e etnia."],
+      ["Para as equações de Slaughter, púbere corresponde aos estágios 2 e 3 de Tanner.", true, "Pré-púbere é o estágio 1 e pós-púbere, os estágios 4 e 5."],
+      ["Nas curvas da OMS de dobras (3 meses a 5 anos), a normalidade vai do P5 ao P95.", true, "P5–P15 é risco de déficit e P85–P95, risco de excesso."],
+      ["Quando DCT + DCSE passa de 35 mm, usa-se outra equação de Slaughter.", true, "Meninos: 0,783 Σ + 1,6. Meninas: 0,546 Σ + 9,7."],
+      ["O uso de diuréticos não interfere na bioimpedância.", false, "Diuréticos alteram a água corporal; devem ser suspensos 7 dias antes."]
+    ],
+    caso: [
+      ["Menina de 12 anos com 28% de gordura. Pela classificação de Deurenberg, o resultado é:",
+        ["Alta", "Adequada", "Muito alta", "Excessivamente alta"], 0,
+        "Para meninas, 25,01 a 30% é alta."],
+      ["Menino de 10 anos com cintura de 72 cm e estatura de 140 cm. Como interpretar?",
+        ["Razão 0,51: obesidade abdominal", "Razão 0,51: normal", "Razão 1,94: normal", "Não é possível sem tabela por idade"], 0,
+        "72 ÷ 140 = 0,51, acima de 0,5."],
+      ["Menino pré-púbere branco: DCT 10 mm e DCSE 8 mm. Qual é o %G aproximado e a classificação?",
+        ["17,5%: adequada", "21,8%: alta", "12,4%: adequada", "8,3%: baixa"], 0,
+        "Σ = 18. %G = 1,21 × 18 − 0,008 × 18² − 1,7 = 21,78 − 2,59 − 1,7 ≈ 17,5%, adequada (10,01–20%)."],
+      ["Adolescente fez bioimpedância logo após treino intenso e em uso de diurético. O que concluir?",
+        ["O resultado não é confiável; repetir com preparo correto", "O resultado é válido", "Basta descontar 2% do resultado", "Trocar pela DXA obrigatoriamente"], 0,
+        "Exercício extenuante nas 24 h anteriores e diurético nos 7 dias anteriores alteram a água corporal."],
+      ["Criança com circunferência do braço de 18 cm e DCT de 10 mm. Qual é a CMB?",
+        ["14,9 cm", "17,0 cm", "8,0 cm", "15,9 cm"], 0,
+        "CMB = 18 − (0,314 × 10) = 18 − 3,14 = 14,86 cm."],
+      ["Menina de 11 anos com 36% de gordura. Pelos percentis brasileiros de Cintra (P95 = 35,4%; P97 = 37,3%), ela está em:",
+        ["Gordura elevada", "Gordura muito elevada", "Eutrofia", "Gordura moderadamente elevada"], 0,
+        "Entre P95 e < P97 corresponde a porcentagem de gordura elevada."]
+    ]
+  },
+  {
+    id: "bioquimicos", title: "Indicadores bioquímicos",
+    desc: "Proteínas plasmáticas, ferro, micronutrientes, lipídios e glicemia.",
+    assoc: [
+      ["Albumina", "Meia-vida de 18 a 20 dias"],
+      ["Pré-albumina", "Meia-vida de 2 a 3 dias"],
+      ["Proteína ligadora do retinol", "Meia-vida de 12 horas"],
+      ["Ferritina < 15 ng/mL", "Depleção dos estoques de ferro"],
+      ["Transferrina", "Sobe na deficiência de ferro"],
+      ["Proteína C reativa", "Proteína de fase aguda que sobe na inflamação"],
+      ["Fósforo", "Cai na síndrome de realimentação"],
+      ["LDL-C ≥ 130 mg/dL", "Valor elevado na criança e no adolescente"]
+    ],
+    mv: [
+      ["A ausência de anemia exclui deficiência de ferro.", false, "A ausência de anemia não exclui deficiência de ferro, folato ou vitamina B12."],
+      ["A albumina é o melhor marcador de mudanças nutricionais agudas.", false, "Sua meia-vida é longa (18–20 dias). Pré-albumina e proteína ligadora do retinol respondem mais rápido."],
+      ["O perfil lipídico pode ser feito a partir dos 2 anos, com jejum de 12 horas.", true, "Indicado sobretudo com excesso de peso ou risco cardiovascular familiar."],
+      ["Glicemia de jejum entre 100 e 125 mg/dL é glicemia de jejum alterada.", true, "A partir de 126 mg/dL em duas ocasiões é diabetes."],
+      ["Na inflamação, albumina e transferrina sobem.", false, "Caem na fase aguda. Sobem PCR, ferritina, fibrinogênio, C3 e alfa-1-antitripsina."],
+      ["Hemoglobina abaixo de 11 g/dL indica anemia entre 1 e 2 anos.", true, "O limite sobe com a idade: 11,5 g/dL de 5 a 8 anos, por exemplo."],
+      ["Exames bioquímicos devem ser pedidos em toda consulta de rotina.", false, "Só em condições específicas, nunca como regra."],
+      ["Pré-albumina e proteína ligadora do retinol sofrem influência do zinco e da vitamina A.", true, "Têm melhor sensibilidade, mas essa interferência limita a interpretação."]
+    ],
+    caso: [
+      ["Criança internada por sepse tem albumina de 2,6 g/dL. Qual é a melhor leitura?",
+        ["Interpretar junto com a PCR: a albumina cai na fase aguda", "Confirma desnutrição grave isoladamente", "É valor normal para a idade", "Indica apenas desidratação"], 0,
+        "Proteínas negativas de fase aguda caem na inflamação; dosagens seriadas com PCR são mais informativas."],
+      ["Menino de 13 anos com hemoglobina de 12,2 g/dL. Como classificar?",
+        ["Anemia (limite de 12,5 g/dL)", "Normal (limite de 11 g/dL)", "Normal (limite de 11,9 g/dL)", "Policitemia"], 0,
+        "Para meninos de 12 a < 15 anos, anemia é Hb < 12,5 g/dL."],
+      ["Lactente de 18 meses: hemoglobina 11,5 g/dL e ferritina 10 ng/mL. Qual é a situação?",
+        ["Deficiência de ferro sem anemia", "Anemia ferropriva", "Estado normal do ferro", "Anemia megaloblástica"], 0,
+        "Hb ≥ 11 g/dL exclui anemia, mas ferritina < 15 ng/mL indica estoques depletados."],
+      ["Criança com desnutrição grave inicia terapia nutricional. Qual exame deve ser monitorado de perto?",
+        ["Fósforo, pelo risco de síndrome de realimentação", "Colesterol total", "Vitamina E", "Fosfatase alcalina apenas"], 0,
+        "O fósforo cai de forma importante no início da realimentação."],
+      ["Adolescente com obesidade tem glicemia de jejum de 130 e 128 mg/dL em dias diferentes. Diagnóstico?",
+        ["Diabetes", "Glicemia de jejum alterada", "Intolerância à glicose", "Normal"], 0,
+        "Glicemia de jejum ≥ 126 mg/dL em duas ocasiões define diabetes (ADA)."],
+      ["Criança de 8 anos: colesterol total 160, LDL-C 115 e triglicérides 90 mg/dL. Como classificar?",
+        ["Colesterol e LDL limítrofes; triglicérides desejáveis", "Tudo desejável", "Tudo elevado", "LDL elevado"], 0,
+        "CT 150–169 e LDL 100–129 são limítrofes; TG < 100 é desejável."]
+    ]
+  },
+  {
+    id: "clinica", title: "Alterações clínicas",
+    desc: "Sinais de carência, marasmo, kwashiorkor e sinais da obesidade.",
+    assoc: [
+      ["Mancha de Bitot", "Deficiência de vitamina A"],
+      ["Coiloníquia (unha em colher)", "Deficiência de ferro"],
+      ["Rosário raquítico e craniotabes", "Deficiência de vitamina D"],
+      ["Gengivas esponjosas e sangrantes", "Deficiência de vitamina C"],
+      ["Estomatite angular e queilose", "Deficiência de riboflavina"],
+      ["Pelagra em áreas expostas ao sol", "Deficiência de niacina"],
+      ["Acanthosis nigricans", "Marcador de resistência insulínica"],
+      ["Dermatite acro-orificial", "Deficiência de zinco"]
+    ],
+    mv: [
+      ["O edema é característico do marasmo.", false, "O edema caracteriza o kwashiorkor. No marasmo não há edema."],
+      ["No marasmo, o desaparecimento da bola de Bichat dá o aspecto de fácies senil.", true, "A bola de Bichat é o último depósito de gordura a ser consumido."],
+      ["A palidez é um sinal precoce da deficiência de ferro.", false, "A palidez é tardia e indica anemia importante; a depleção de ferro já afeta o metabolismo antes."],
+      ["A nictalopia é a alteração ocular mais precoce da hipovitaminose A.", true, "Depois vêm xerose conjuntival, manchas de Bitot, xerose corneal, úlcera e queratomalácia."],
+      ["O kwashiorkor acomete principalmente lactentes jovens.", false, "Em geral acomete maiores de 2 anos. O marasmo é mais comum em lactentes jovens."],
+      ["A pressão arterial deve ser aferida a partir dos 3 anos, a cada 6 meses.", true, "Com manguito adequado e tabelas por sexo, idade e estatura."],
+      ["A hepatomegalia do kwashiorkor se deve à esteatose.", true, "No marasmo, a hepatomegalia é rara."],
+      ["A deficiência de vitamina B12 é rara em crianças de dieta vegetariana estrita.", false, "É justamente nas dietas vegetarianas estritas e na má-absorção crônica que ela aparece."]
+    ],
+    caso: [
+      ["Criança de 3 anos com edema de membros inferiores, lesões hipo e hipercrômicas com descamação, cabelo que se solta e hepatomegalia. Hipótese?",
+        ["Kwashiorkor", "Marasmo", "Raquitismo", "Escorbuto"], 0,
+        "Edema, dermatose, alteração de cabelo e esteatose hepática são típicos do kwashiorkor."],
+      ["Lactente de 8 meses com membros delgados, costelas visíveis, nádegas atróficas e fácies senil, sem edema. Hipótese?",
+        ["Marasmo", "Kwashiorkor", "Hipotireoidismo", "Síndrome de Down"], 0,
+        "Atrofia muscular e subcutânea com fácies senil e sem edema caracteriza o marasmo."],
+      ["Lactente chora à manipulação, fica em posição de batráquio e tem gengivas sangrantes. Qual deficiência?",
+        ["Vitamina C (escorbuto)", "Vitamina D", "Vitamina B1", "Zinco"], 0,
+        "Dor intensa, pseudoparalisia em posição de batráquio e sangramentos são sinais de escorbuto."],
+      ["Pré-escolar enxerga mal em ambientes escuros e tem pele áspera nos membros inferiores. Qual deficiência?",
+        ["Vitamina A", "Ferro", "Niacina", "Vitamina K"], 0,
+        "Nictalopia e hiperceratose folicular indicam hipovitaminose A; o pré-escolar é o grupo de maior risco."],
+      ["Adolescente com obesidade apresenta escurecimento aveludado no pescoço e nas axilas. O que esse sinal indica?",
+        ["Resistência insulínica; investigar o metabolismo glicídico", "Deficiência de zinco", "Infecção fúngica apenas", "Achado sem importância"], 0,
+        "Acanthosis nigricans é marcador de resistência insulínica, mecanismo central das alterações glicêmicas na obesidade."],
+      ["Lactente amamentado por mãe vegana estrita tem anemia megaloblástica, irritabilidade e glossite. Qual deficiência?",
+        ["Vitamina B12", "Ferro", "Vitamina C", "Vitamina D"], 0,
+        "Dietas vegetarianas estritas associam-se à deficiência de B12."],
+      ["Criança com dermatite ao redor da boca e do ânus, diarreia e infecções de repetição. Qual deficiência?",
+        ["Zinco", "Riboflavina", "Vitamina A", "Ferro"], 0,
+        "Dermatite acro-orificial, diarreia e infecções recorrentes sugerem deficiência de zinco."]
+    ]
+  }
+];
+
+TOPICS.push({
+  id: "bonus", bonus: true, title: "Bônus",
+  desc: "Anamnese e consumo alimentar, situações especiais e hospitalização, crescimento no 1º ano, leitura da curva, medidas acessórias e micronutrientes.",
+  assoc: [
+    ["Recordatório de 24 horas", "Reflete um único dia e depende da memória do entrevistado"],
+    ["Registro alimentar", "Anotação de 3 ou 4 dias alternados, incluindo um dia de fim de semana"],
+    ["Frequência alimentar", "Quantas vezes um alimento ou grupo foi consumido em um período"],
+    ["Curvas de Brooks", "Paralisia cerebral, por nível de comprometimento motor (GMFCS)"],
+    ["Curvas do CDC específicas", "Síndrome de Down (0 a 36 meses e 2 a 20 anos)"],
+    ["Fontanela anterior", "Fecha entre 9 e 18 meses"],
+    ["Segmento superior/inferior ≈ 1", "Proporção esperada entre 8 e 10 anos"],
+    ["Retinol plasmático < 20 µg/dL", "Fase clínica da hipovitaminose A"]
+  ],
+  mv: [
+    ["Ganho de peso inferior a 20 g/dia no primeiro trimestre é motivo de preocupação.", true, "O esperado é 25 a 30 g/dia (cerca de 700 g/mês) nos primeiros 3 meses."],
+    ["No segundo trimestre de vida, o ganho de peso esperado é de cerca de 900 g/mês.", false, "O esperado é cerca de 600 g/mês; depois cai para 500 g/mês no 3º trimestre e 300 g/mês no 4º."],
+    ["Uma curva de peso que fica horizontal entre as consultas é sinal de alerta.", true, "Ascendente é satisfatório, horizontal é alerta e descendente é perigo."],
+    ["Na criança internada com menos de 2 anos, o peso deve ser aferido semanalmente.", false, "Abaixo de 2 anos o peso é diário; estatura e perímetro cefálico são semanais."],
+    ["O recordatório de 24 horas é o padrão-ouro da avaliação do consumo alimentar.", false, "Não existe padrão-ouro; a escolha do inquérito depende do objetivo e da idade."],
+    ["Em pré-escolares, recomenda-se aplicar vários recordatórios em consultas diferentes.", true, "O apetite varia muito nessa fase; vários recordatórios reduzem esse efeito."],
+    ["Dos 6 aos 10 anos, recomendam-se cerca de 10 a 11 horas de sono por dia.", true, "Sem sonecas nessa faixa (National Sleep Foundation, apud SBP 2021)."],
+    ["Desnutrição secundária é a causada por ingestão alimentar insuficiente.", false, "Essa é a primária. A secundária está associada a uma doença de base."],
+    ["Na fase subclínica da hipovitaminose A já aparece xeroftalmia.", false, "Na fase subclínica (retinol de 20 a 40 µg/dL) as reservas caem, mas ainda não há sinais clínicos."],
+    ["As equações de Chumlea (1994) estimam a estatura pela altura do joelho dos 6 aos 18 anos.", true, "Para 2 a 12 anos com limitação física, a SBP adota as equações de Stevenson."]
+  ],
+  caso: [
+    ["Lactente de 2 meses em aleitamento materno exclusivo ganhou 300 g nos últimos 30 dias. Qual é a melhor conduta?",
+      ["Investigar a amamentação: observar a mamada, número de mamadas e de fraldas", "Tranquilizar: o ganho está dentro do esperado", "Introduzir fórmula infantil de imediato, sem avaliar", "Reavaliar só aos 6 meses"], 0,
+      "300 g em 30 dias são 10 g/dia, abaixo dos 20 g/dia que já preocupam no 1º trimestre. A anamnese do aleitamento e a observação da mamada vêm antes de qualquer mudança."],
+    ["Pré-escolar com anemia ferropriva. A mãe conta que ele toma leite no almoço e no jantar. Que inquérito usar e que orientação dar?",
+      ["Frequência alimentar de carnes, vísceras e leguminosas; tirar o leite das refeições principais e oferecer fruta cítrica depois", "Registro alimentar de 7 dias; aumentar o leite", "Apenas recordatório de 24 h; suspender todas as carnes", "Nenhum inquérito; só suplementar ferro"], 0,
+      "A frequência alimentar avalia o consumo de alimentos fontes de ferro. Leite nas refeições principais dificulta a absorção; cítricos depois do almoço e do jantar a favorecem."],
+    ["Criança de 18 meses internada por pneumonia, com desnutrição na admissão. Qual plano de monitoramento antropométrico?",
+      ["Peso diário; estatura e perímetro cefálico semanais, em gráfico sequencial", "Peso semanal e estatura mensal", "Só peso na alta", "Peso e estatura apenas na admissão"], 0,
+      "Abaixo de 2 anos a SBP recomenda peso diário e estatura e PC semanais, com intervalos menores conforme a gravidade."]
+  ]
+});
+
+// Raciocínio clínico: 3 casos por tema (os que mais exigem raciocínio)
+const KEEP = { conceitos: [0, 1, 5], tecnica: [1, 3, 4], indices: [3, 4, 6], composicao: [2, 1, 3], bioquimicos: [0, 2, 3], clinica: [0, 2, 4] };
+TOPICS.forEach(t => { if (KEEP[t.id]) t.caso = KEEP[t.id].map(i => t.caso[i]); });
+
+const GAME_LABELS ={ assoc: "Associação", mv: "Mito ou verdade", caso: "Raciocínio clínico" };
+
+// ---------- Avaliação (20 questões, gabarito equilibrado: 5 de cada letra) ----------
+const EVAL = [
+  ["Para avaliar excesso de peso em uma criança de 7 anos, o índice recomendado é:", ["Peso/idade", "IMC/idade", "Peso/estatura", "Estatura/idade"], 1],
+  ["Uma criança de 30 meses foi medida deitada: 92,0 cm. Qual valor registrar como altura?", ["92,7 cm", "92,0 cm", "91,0 cm", "91,3 cm"], 3],
+  ["Qual é o principal hormônio do crescimento fetal?", ["Insulina", "Hormônio do crescimento (GH)", "Testosterona", "Cortisol"], 0],
+  ["Qual é a meia-vida aproximada da pré-albumina?", ["18 a 20 dias", "8 a 9 dias", "2 a 3 dias", "12 horas"], 2],
+  ["Criança de 3 anos com edema bilateral, dermatose descamativa e hepatomegalia por esteatose. A hipótese principal é:", ["Kwashiorkor", "Marasmo", "Raquitismo", "Hipotireoidismo"], 0],
+  ["Menino de 9 anos com IMC/idade em +2,5 escore-z. A classificação é:", ["Sobrepeso", "Eutrofia", "Obesidade", "Obesidade grave"], 2],
+  ["Qual é o ponto de corte da razão cintura/estatura para obesidade abdominal?", ["0,4", "0,5", "0,6", "0,8"], 1],
+  ["Qual inquérito alimentar reflete um único dia e depende da memória do entrevistado?", ["Registro alimentar", "Questionário de frequência alimentar", "Pesagem direta dos alimentos", "Recordatório de 24 horas"], 3],
+  ["Segundo a SBP (2021), qual é o intervalo mínimo entre duas medidas para calcular a velocidade de crescimento?", ["1 mês", "3 meses", "6 meses", "2 anos"], 2],
+  ["Qual é o primeiro sinal de puberdade no menino?", ["Volume testicular de 4 mL ou mais", "Pelos pubianos", "Mudança da voz", "Estirão de crescimento"], 0],
+  ["Qual destes é critério da OMS/UNICEF para desnutrição aguda grave entre 6 e 60 meses?", ["Peso/idade abaixo de −2 escore-z", "Estatura/idade abaixo de −3 escore-z", "IMC/idade abaixo de −2 escore-z", "Circunferência do braço abaixo de 115 mm"], 3],
+  ["Lactente de 18 meses com hemoglobina de 11,5 g/dL e ferritina de 10 ng/mL. A situação é:", ["Anemia ferropriva", "Deficiência de ferro sem anemia", "Estado normal do ferro", "Anemia megaloblástica"], 1],
+  ["A mancha de Bitot indica deficiência de:", ["Ferro", "Vitamina C", "Zinco", "Vitamina A"], 3],
+  ["Menino cujo pai mede 178 cm e a mãe 162 cm. Qual é a estatura-alvo?", ["170 cm", "176,5 cm", "163,5 cm", "183,5 cm"], 1],
+  ["Nas equações de Slaughter, um adolescente no estágio 3 de Tanner é classificado como:", ["Pré-púbere", "Pós-púbere", "Púbere", "Não se aplica a equação"], 2],
+  ["No prematuro, até que idade se usa a idade corrigida para peso, estatura e perímetro cefálico?", ["24 meses", "12 meses", "6 meses", "5 anos"], 0],
+  ["Criança de 3 anos com estatura/idade em −3,4 escore-z. A classificação é:", ["Baixa estatura para a idade", "Muito baixa estatura para a idade", "Estatura adequada", "Magreza acentuada"], 1],
+  ["Na fase aguda de uma inflamação, o esperado é:", ["Albumina cai e PCR sobe", "Albumina sobe e PCR cai", "Albumina e PCR sobem", "Albumina e PCR caem"], 0],
+  ["Na criança internada com menos de 2 anos, a SBP recomenda monitorar:", ["Peso semanal e estatura mensal", "Peso apenas na admissão", "Peso mensal", "Peso diário; estatura e perímetro cefálico semanais"], 3],
+  ["A pressão arterial deve ser aferida na criança:", ["Desde o nascimento, em toda consulta", "A partir de 1 ano, uma vez por ano", "A partir de 3 anos, a cada 6 meses", "Somente a partir dos 10 anos"], 2]
+];
+const LETTERS = ["a", "b", "c", "d"];
+
+// URL do aplicativo da Web do Google Apps Script (veja o README). Deixe vazio para não enviar.
+const APPS_SCRIPT_URL = "";
+
+// ---------- Ícones ----------
+const ICONS = {
+  back: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  assoc: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="7" r="3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="17" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8.5 9l7 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  mv: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12.5l3 3 5.5-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 9l6 6M21 9l-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
+  caso: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>'
+};
+
+// ---------- Estado ----------
+const app = document.getElementById("app");
+const state = { name: "", results: {}, open: null };
+function storeGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function storeSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+function loadResults() {
+  try { state.results = JSON.parse(storeGet("anp-results-" + state.name.toLowerCase()) || "{}") || {}; }
+  catch (e) { state.results = {}; }
+}
+function saveResult(topic, game, score, total) {
+  const key = topic + ":" + game;
+  const prev = state.results[key];
+  if (!prev || prev.total !== total || score > prev.score) state.results[key] = { score, total };
+  storeSet("anp-results-" + state.name.toLowerCase(), JSON.stringify(state.results));
+}
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+// Mito ou verdade: sorteia a ordem sem deixar mais de 2 respostas iguais seguidas
+function alternated(items) {
+  let best = shuffle(items);
+  for (let t = 0; t < 200; t++) {
+    const cand = shuffle(items);
+    let run = 1, ok = true;
+    for (let i = 1; i < cand.length; i++) { run = cand[i][1] === cand[i - 1][1] ? run + 1 : 1; if (run > 2) { ok = false; break; } }
+    if (ok) return cand;
+    best = cand;
+  }
+  return best;
+}
+function totals() {
+  let s = 0, t = 0, n = 0;
+  Object.values(state.results).forEach(r => { s += r.score; t += r.total; n++; });
+  return { s, t, n };
+}
+
+// ---------- Início ----------
+function renderStart() {
+  const saved = storeGet("anp-name") || "";
+  app.innerHTML = `
+  <section class="panel start">
+    <svg class="curve" viewBox="0 0 460 120" aria-hidden="true">
+      <path d="M10 110 C 80 60, 160 40, 450 20" fill="none" stroke="var(--grid)" stroke-width="14" stroke-linecap="round"/>
+      <path d="M10 110 C 90 78, 170 58, 450 40" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
+      <path d="M10 110 C 100 92, 180 76, 450 62" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 6"/>
+      <circle cx="300" cy="50" r="6" fill="var(--accent)"/>
+    </svg>
+    <h1>Avaliação nutricional da criança e do adolescente</h1>
+    <p class="muted">Jogos por tema (associação, mito ou verdade e raciocínio clínico) e uma avaliação final. Conteúdo atualizado pelo Manual da SBP (2021), SISVAN e OMS.</p>
+    <form id="nameForm" class="field" novalidate>
+      <label for="studentName">Seu nome</label>
+      <input id="studentName" name="studentName" autocomplete="name" maxlength="60" placeholder="Digite seu nome" value="${esc(saved)}">
+      <div class="err" id="nameErr" role="alert"></div>
+      <div class="row"><button class="btn" type="submit">Começar</button></div>
+    </form>
+  </section>`;
+  const f = document.getElementById("nameForm");
+  const inp = document.getElementById("studentName");
+  inp.focus();
+  f.addEventListener("submit", e => {
+    e.preventDefault();
+    const v = inp.value.trim();
+    if (v.length < 2) { document.getElementById("nameErr").textContent = "Digite seu nome para começar (pelo menos 2 letras)."; inp.focus(); return; }
+    state.name = v; storeSet("anp-name", v); loadResults(); renderHub();
+  });
+}
+
+// ---------- Painel principal ----------
+function renderHub() {
+  const t = totals();
+  const nGames = TOPICS.length * 3;
+  app.innerHTML = `
+  <header class="topbar">
+    <div style="display:grid;gap:4px">
+      <h2>Olá, ${esc(state.name)}</h2>
+      <p class="muted">Treine nos jogos de cada tema e depois faça a avaliação.</p>
+    </div>
+    <div class="row">
+      <span class="score-chip" title="Soma dos melhores resultados">${t.s} / ${t.t || 0} pontos · ${t.n} de ${nGames} jogos</span>
+      <button class="btn ghost" id="changeName" type="button">Trocar nome</button>
+    </div>
+  </header>
+  <section class="panel evalcard">
+    <div style="display:grid;gap:6px">
+      <span class="eyebrow">Avaliação</span>
+      <h2>Avaliação final</h2>
+      <p class="muted">${EVAL.length} questões de múltipla escolha (a a d), misturando todos os temas. Será pedido seu nome e sua matrícula.</p>
+    </div>
+    <button class="btn" type="button" id="goEval">Fazer avaliação</button>
+  </section>
+  <section class="topics">
+    ${TOPICS.map(tp => {
+      const isOpen = state.open === tp.id;
+      return `
+      <article class="panel topic${tp.bonus ? " bonus" : ""}${isOpen ? " open" : ""}">
+        <button class="topic-toggle" type="button" data-topic="${tp.id}" aria-expanded="${isOpen}" aria-controls="g-${tp.id}">
+          <h3>${tp.bonus ? "★ " : ""}${tp.title}</h3>
+          <span class="chev" aria-hidden="true">${isOpen ? "−" : "+"}</span>
+        </button>
+        <div class="games" id="g-${tp.id}" ${isOpen ? "" : "hidden"}>
+          ${["assoc", "mv", "caso"].map(g => {
+            const r = state.results[tp.id + ":" + g];
+            const n = tp[g].length;
+            return `<button class="gamebtn" type="button" data-topic="${tp.id}" data-game="${g}">
+              <span class="kind"><span class="gicon">${ICONS[g]}</span>${GAME_LABELS[g]}</span>
+              <span class="best ${r ? "done" : ""}">${r ? "Melhor: " + r.score + "/" + r.total : n + " rodadas"}</span>
+            </button>`;
+          }).join("")}
+        </div>
+      </article>`;
+    }).join("")}
+  </section>`;
+  document.getElementById("changeName").onclick = renderStart;
+  document.getElementById("goEval").onclick = renderEvalLogin;
+  app.querySelectorAll(".topic-toggle").forEach(b => b.onclick = () => {
+    state.open = state.open === b.dataset.topic ? null : b.dataset.topic;
+    renderHub();
+    const el = app.querySelector(`[data-topic="${b.dataset.topic}"].topic-toggle`); if (el) el.focus();
+  });
+  app.querySelectorAll(".gamebtn").forEach(b => b.onclick = () => startGame(b.dataset.topic, b.dataset.game));
+}
+
+// ---------- Barra superior dos jogos ----------
+function toolbar(tp, game) {
+  return `<nav class="toolbar" aria-label="Navegação do jogo">
+    <button class="tool back" type="button" data-nav="back" title="Voltar aos temas">${ICONS.back}<span>Voltar</span></button>
+    <span class="tool-title">${tp.title}</span>
+    <div class="tool-group">
+      ${["assoc", "mv", "caso"].map(g => `<button class="tool${g === game ? " active" : ""}" type="button" data-nav="${g}" title="${GAME_LABELS[g]}" ${g === game ? 'aria-current="page"' : ""}>${ICONS[g]}<span>${GAME_LABELS[g]}</span></button>`).join("")}
+    </div>
+  </nav>`;
+}
+function bindToolbar(tp) {
+  app.querySelectorAll(".toolbar .tool").forEach(b => b.onclick = () => {
+    const n = b.dataset.nav;
+    if (n === "back") { state.open = tp.id; renderHub(); window.scrollTo(0, 0); }
+    else startGame(tp.id, n);
+  });
+}
+function statline(idx, total, score, extra) {
+  return `<div class="gamehead">
+    <div class="progress" aria-hidden="true"><span style="width:${Math.round(idx / total * 100)}%"></span></div>
+    <div class="statline"><span>Rodada ${Math.min(idx + 1, total)} de ${total}</span><span>Acertos: ${score}${extra || ""}</span></div>
+  </div>`;
+}
+
+function startGame(topicId, game) {
+  const tp = TOPICS.find(t => t.id === topicId);
+  window.scrollTo(0, 0);
+  if (game === "assoc") return playAssoc(tp);
+  if (game === "mv") return playMV(tp);
+  return playCase(tp);
+}
+
+function playMV(tp) {
+  const items = alternated(tp.mv);
+  let i = 0, score = 0;
+  const draw = () => {
+    const [text, truth, why] = items[i];
+    app.innerHTML = `${toolbar(tp, "mv")}<section class="panel" style="display:grid;gap:18px">
+      ${statline(i, items.length, score)}
+      <p class="question">${esc(text)}</p>
+      <div class="mv">
+        <button class="opt" type="button" data-v="0">Mito</button>
+        <button class="opt" type="button" data-v="1">Verdade</button>
+      </div>
+      <div id="fb"></div>
+    </section>`;
+    bindToolbar(tp);
+    app.querySelectorAll(".mv .opt").forEach(b => b.onclick = () => {
+      const ok = (b.dataset.v === "1") === truth;
+      if (ok) score++;
+      app.querySelectorAll(".mv .opt").forEach(x => {
+        x.disabled = true;
+        if ((x.dataset.v === "1") === truth) x.classList.add("right");
+        else if (x === b) x.classList.add("wrong");
+      });
+      const last = i === items.length - 1;
+      document.getElementById("fb").innerHTML = `<div class="feedback ${ok ? "ok" : "no"}">
+        <strong>${ok ? "Acertou!" : "Não foi dessa vez."} É ${truth ? "verdade" : "mito"}.</strong>
+        <span>${esc(why)}</span>
+        <div class="row" style="margin-top:6px"><button class="btn" id="next" type="button">${last ? "Ver resultado" : "Próxima"}</button></div>
+      </div>`;
+      const n = document.getElementById("next"); n.focus();
+      n.onclick = () => { i++; if (i < items.length) draw(); else finish(tp, "mv", score, items.length); };
+    });
+  };
+  draw();
+}
+
+function playCase(tp) {
+  const items = shuffle(tp.caso);
+  let i = 0, score = 0;
+  const draw = () => {
+    const [q, opts, right, why] = items[i];
+    const order = shuffle(opts.map((o, k) => k));
+    app.innerHTML = `${toolbar(tp, "caso")}<section class="panel" style="display:grid;gap:18px">
+      ${statline(i, items.length, score)}
+      <div class="case"><p class="question" style="font-size:18px">${esc(q)}</p></div>
+      <div class="options">${order.map((k, j) => `<button class="opt" type="button" data-k="${k}"><span class="letter">${LETTERS[j]})</span> ${esc(opts[k])}</button>`).join("")}</div>
+      <div id="fb"></div>
+    </section>`;
+    bindToolbar(tp);
+    app.querySelectorAll(".options .opt").forEach(b => b.onclick = () => {
+      const k = Number(b.dataset.k), ok = k === right;
+      if (ok) score++;
+      app.querySelectorAll(".options .opt").forEach(x => {
+        x.disabled = true;
+        if (Number(x.dataset.k) === right) x.classList.add("right");
+        else if (x === b) x.classList.add("wrong");
+      });
+      const last = i === items.length - 1;
+      document.getElementById("fb").innerHTML = `<div class="feedback ${ok ? "ok" : "no"}">
+        <strong>${ok ? "Raciocínio correto!" : "Resposta certa: " + esc(opts[right])}</strong>
+        <span>${esc(why)}</span>
+        <div class="row" style="margin-top:6px"><button class="btn" id="next" type="button">${last ? "Ver resultado" : "Próximo caso"}</button></div>
+      </div>`;
+      const n = document.getElementById("next"); n.focus();
+      n.onclick = () => { i++; if (i < items.length) draw(); else finish(tp, "caso", score, items.length); };
+    });
+  };
+  draw();
+}
+
+function playAssoc(tp) {
+  const pairs = tp.assoc.map((p, k) => ({ k, a: p[0], b: p[1] }));
+  const left = shuffle(pairs), right = shuffle(pairs);
+  let selected = null, matched = 0, score = 0, errors = 0;
+  const missed = new Set();
+  app.innerHTML = `${toolbar(tp, "assoc")}<section class="panel" style="display:grid;gap:18px">
+    <div id="hd"></div>
+    <p class="muted">Toque em um termo da esquerda e depois na descrição que combina com ele. Cada par certo de primeira vale 1 ponto.</p>
+    <div class="match">
+      <div class="col"><h3>Termo</h3>${left.map(p => `<button class="tile" type="button" data-side="a" data-k="${p.k}">${esc(p.a)}</button>`).join("")}</div>
+      <div class="col"><h3>Descrição</h3>${right.map(p => `<button class="tile" type="button" data-side="b" data-k="${p.k}">${esc(p.b)}</button>`).join("")}</div>
+    </div>
+    <div id="fb"></div>
+  </section>`;
+  bindToolbar(tp);
+  const hd = () => {
+    document.getElementById("hd").innerHTML = statline(matched, pairs.length, score, ` · <span class="errcount">Tentativas erradas: ${errors}</span>`);
+  };
+  hd();
+  app.querySelectorAll(".tile").forEach(t => t.onclick = () => {
+    if (t.classList.contains("matched")) return;
+    if (t.dataset.side === "a") {
+      app.querySelectorAll('.tile[data-side="a"]').forEach(x => x.classList.remove("selected"));
+      t.classList.add("selected"); selected = t; return;
+    }
+    if (!selected) { document.getElementById("fb").innerHTML = `<p class="muted">Escolha primeiro um termo na coluna da esquerda.</p>`; return; }
+    const k = selected.dataset.k;
+    if (t.dataset.k === k) {
+      matched++;
+      if (!missed.has(k)) score++;
+      [selected, t].forEach(x => { x.classList.remove("selected"); x.classList.add("matched"); x.disabled = true; });
+      t.innerHTML = `<span class="tag">✓</span>` + t.innerHTML;
+      selected = null;
+      document.getElementById("fb").innerHTML = "";
+      hd();
+      if (matched === pairs.length) setTimeout(() => finish(tp, "assoc", score, pairs.length, errors), 450);
+    } else {
+      errors++; missed.add(k);
+      hd();
+      t.classList.add("shake");
+      setTimeout(() => t.classList.remove("shake"), 380);
+      document.getElementById("fb").innerHTML = `<p style="color:var(--bad)">Esse par não combina. Tente outra descrição para “${esc(selected.textContent)}”.</p>`;
+    }
+  });
+}
+
+function finish(tp, game, score, total, errors) {
+  saveResult(tp.id, game, score, total);
+  const pct = score / total;
+  const msg = pct === 1 ? "Gabaritou! Domínio completo do tema."
+    : pct >= 0.7 ? "Muito bom. Revise só os itens que errou."
+    : pct >= 0.4 ? "Bom começo. Vale reler este tema no material e tentar de novo."
+    : "Este tema precisa de revisão. Releia o material e jogue novamente.";
+  const best = state.results[tp.id + ":" + game];
+  app.innerHTML = `${toolbar(tp, game)}<section class="panel result">
+    <span class="crumb">${GAME_LABELS[game]}</span>
+    <h2>${esc(state.name)}, seu resultado</h2>
+    <div class="big">${score}<small> / ${total}</small></div>
+    <p>${msg}</p>
+    ${game === "assoc" ? `<p>Tentativas erradas: <strong>${errors}</strong></p>` : ""}
+    <p class="muted">Melhor resultado neste jogo: ${best.score}/${best.total}</p>
+    <div class="row">
+      <button class="btn" type="button" id="again">Jogar de novo</button>
+    </div>
+  </section>`;
+  bindToolbar(tp);
+  document.getElementById("again").onclick = () => startGame(tp.id, game);
+  document.getElementById("again").focus();
+}
+
+// ---------- Avaliação ----------
+function renderEvalLogin() {
+  window.scrollTo(0, 0);
+  app.innerHTML = `
+  <nav class="toolbar"><button class="tool back" type="button" id="evBack">${ICONS.back}<span>Voltar</span></button><span class="tool-title">Avaliação</span></nav>
+  <section class="panel login">
+    <h2>Identificação</h2>
+    <p class="muted">Preencha seu nome completo e sua matrícula. Cada envio fica registrado para o professor.</p>
+    <form id="loginForm" class="field" novalidate>
+      <label for="evName">Nome completo</label>
+      <input id="evName" autocomplete="name" maxlength="80" placeholder="Nome e sobrenome">
+      <label for="evMat">Matrícula</label>
+      <input id="evMat" inputmode="numeric" maxlength="20" placeholder="Número de matrícula">
+      <div class="err" id="evErr" role="alert"></div>
+      <div class="row"><button class="btn" type="submit">Iniciar avaliação</button></div>
+    </form>
+  </section>`;
+  document.getElementById("evBack").onclick = renderHub;
+  document.getElementById("evName").focus();
+  document.getElementById("loginForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const nome = document.getElementById("evName").value.trim();
+    const mat = document.getElementById("evMat").value.trim();
+    const err = document.getElementById("evErr");
+    if (nome.length < 3) { err.textContent = "Digite seu nome completo."; return; }
+    if (mat.length < 3) { err.textContent = "Digite sua matrícula."; return; }
+    runEval(nome, mat);
+  });
+}
+
+function runEval(nome, mat) {
+  const answers = new Array(EVAL.length).fill(null);
+  const started = Date.now();
+  let i = 0;
+  const draw = () => {
+    const [q, opts] = EVAL[i];
+    const done = answers.filter(a => a !== null).length;
+    app.innerHTML = `
+    <nav class="toolbar"><span class="tool-title">Avaliação · ${esc(nome)} · ${esc(mat)}</span></nav>
+    <section class="panel" style="display:grid;gap:18px">
+      <div class="gamehead">
+        <div class="progress" aria-hidden="true"><span style="width:${Math.round(done / EVAL.length * 100)}%"></span></div>
+        <div class="statline"><span>Questão ${i + 1} de ${EVAL.length}</span><span>Respondidas: ${done}</span></div>
+      </div>
+      <p class="question">${i + 1}. ${esc(q)}</p>
+      <div class="options" role="radiogroup" aria-label="Alternativas">
+        ${opts.map((o, k) => `<button class="opt evopt${answers[i] === k ? " chosen" : ""}" type="button" role="radio" aria-checked="${answers[i] === k}" data-k="${k}"><span class="letter">${LETTERS[k]})</span> ${esc(o)}</button>`).join("")}
+      </div>
+      <div class="row between">
+        <button class="btn ghost" type="button" id="prev" ${i === 0 ? "disabled" : ""}>Anterior</button>
+        <button class="btn" type="button" id="next" ${answers[i] === null ? "disabled" : ""}>${i === EVAL.length - 1 ? "Revisar e enviar" : "Próxima"}</button>
+      </div>
+    </section>`;
+    app.querySelectorAll(".evopt").forEach(b => b.onclick = () => { answers[i] = Number(b.dataset.k); draw(); });
+    document.getElementById("prev").onclick = () => { i--; draw(); };
+    document.getElementById("next").onclick = () => { if (i < EVAL.length - 1) { i++; draw(); } else review(); };
+  };
+  const review = () => {
+    const blank = answers.map((a, k) => a === null ? k + 1 : null).filter(Boolean);
+    app.innerHTML = `
+    <nav class="toolbar"><span class="tool-title">Avaliação · ${esc(nome)} · ${esc(mat)}</span></nav>
+    <section class="panel result">
+      <h2>Revise antes de enviar</h2>
+      <div class="answers">${answers.map((a, k) => `<button class="ans" type="button" data-k="${k}"><b>${k + 1}</b> ${a === null ? "–" : LETTERS[a]}</button>`).join("")}</div>
+      <p class="muted">${blank.length ? "Sem resposta: " + blank.join(", ") + ". " : ""}Toque em um número para voltar à questão. Depois de enviar não é possível alterar.</p>
+      <div class="err" id="sendErr" role="alert"></div>
+      <div class="row"><button class="btn" type="button" id="send" ${blank.length ? "disabled" : ""}>Enviar avaliação</button></div>
+    </section>`;
+    app.querySelectorAll(".ans").forEach(b => b.onclick = () => { i = Number(b.dataset.k); draw(); });
+    document.getElementById("send").onclick = () => submit();
+  };
+  const submit = async () => {
+    const correct = answers.filter((a, k) => a === EVAL[k][2]).length;
+    const payload = {
+      nome, matricula: mat,
+      respostas: answers.map(a => LETTERS[a]).join(""),
+      acertos: correct, total: EVAL.length,
+      duracaoSeg: Math.round((Date.now() - started) / 1000),
+      inicio: new Date(started).toISOString(),
+      navegador: navigator.userAgent.slice(0, 120)
+    };
+    const btn = document.getElementById("send");
+    btn.disabled = true; btn.textContent = "Enviando…";
+    let sent = false, msg = "";
+    if (!APPS_SCRIPT_URL) {
+      msg = "O envio para a planilha ainda não foi configurado nesta página. Mostre este resultado ao professor.";
+    } else {
+      try {
+        await fetch(APPS_SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
+        sent = true;
+      } catch (e) {
+        document.getElementById("sendErr").textContent = "Não foi possível enviar. Verifique sua conexão e toque em Enviar avaliação de novo.";
+        btn.disabled = false; btn.textContent = "Enviar avaliação";
+        return;
+      }
+    }
+    const n = Number(storeGet("anp-eval-count-" + mat) || 0) + 1;
+    storeSet("anp-eval-count-" + mat, String(n));
+    app.innerHTML = `
+    <nav class="toolbar"><button class="tool back" type="button" id="evHome">${ICONS.back}<span>Voltar aos temas</span></button><span class="tool-title">Avaliação</span></nav>
+    <section class="panel result">
+      <span class="crumb">${esc(nome)} · matrícula ${esc(mat)}</span>
+      <h2>Avaliação ${sent ? "enviada" : "concluída"}</h2>
+      <div class="big">${correct}<small> / ${EVAL.length}</small></div>
+      <p>Nota: <strong>${(correct / EVAL.length * 10).toFixed(1).replace(".", ",")}</strong> · Tempo: ${Math.round(payload.duracaoSeg / 60)} min</p>
+      <p class="muted">${sent ? "Suas respostas foram registradas na planilha do professor." : msg}</p>
+    </section>`;
+    document.getElementById("evHome").onclick = renderHub;
+  };
+  draw();
+}
+
+renderStart();
+</script>
+</body>
+</html>
